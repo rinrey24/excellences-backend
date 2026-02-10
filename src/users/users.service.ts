@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { BusinessException } from 'src/common/exceptions/business.exception';
+import { RESPONSE_MESSAGE } from 'src/common/constants/reponse-message';
 
 @Injectable()
 export class UsersService {
@@ -22,21 +24,25 @@ export class UsersService {
         return this.userRepo.save(user);
     }
 
-    findAll(){
-        return this.userRepo.find({
+    async findAll(){
+        const user = await this.userRepo.find({
             select: ['id','username','name','role','created_at']
-        })
+        });
+        return {
+            message: RESPONSE_MESSAGE.USER.FETCHED,
+            data: user,
+        };
     }
 
     async findOne(id: number){
         const user = await this.userRepo.findOne({ where: { id}});
-        if (!user) throw new NotFoundException('User not found');
+        if (!user) throw new BusinessException(RESPONSE_MESSAGE.USER.NOT_FOUND);
         return user;
     }
     
     async findOneByUsername(username: string){
         const user = await this.userRepo.findOne({ where: { username}});
-        if (!user) throw new NotFoundException('User not found');
+        if (!user) throw new BusinessException(RESPONSE_MESSAGE.USER.NOT_FOUND);
         return user;
     }
 

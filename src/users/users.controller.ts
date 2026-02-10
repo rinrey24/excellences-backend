@@ -13,17 +13,25 @@ export class UsersController {
         return this.usersService.create(dto);
     }
 
-    //@UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Get()
     findAll() {
         return this.usersService.findAll();
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get(':id')
     findOne(@Param('id') id: number) {
         return this.usersService.findOne(id);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Get('username/:username')
+    findOneByUsername(@Param('username') username: string) {
+        return this.usersService.findOneByUsername(username);
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Put(':id')
     update(@Param('id') id: number, @Body() dto: UpdateUserDto) {
         return this.usersService.update(+id,dto);

@@ -1,0 +1,298 @@
+import { Processor, Process } from '@nestjs/bull';
+import type { Job } from 'bull';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Claim } from './entities/claim.entity';
+import { ImportJob } from './entities/import.entity';
+import { parseInaDate } from '../common/utils/date.util';
+import { Readable } from 'stream';
+import { RESPONSE_MESSAGE } from 'src/common/constants/reponse-message';
+
+@Processor('claims-import')
+export class ClaimsImportProcessor {
+  constructor(
+    @InjectRepository(Claim)
+    private readonly claimsRepo: Repository<Claim>,
+    @InjectRepository(ImportJob)
+    private readonly importJobRepo: Repository<ImportJob>,
+  ) {}
+
+  @Process()
+  async processImport(job: Job) {
+    const { fileBuffer: rawFileBuffer, fileName, importJobId } = job.data;
+    const batchSize = 500;
+    const startTime = Date.now();
+
+    // Update ImportJob status to 'processing'
+    await this.importJobRepo.update(importJobId, {
+      status: 'processing',
+      started_at: new Date(),
+    });
+
+    let fileBuffer: Buffer;
+    if (Buffer.isBuffer(rawFileBuffer)) {
+      fileBuffer = rawFileBuffer;
+    } else if (rawFileBuffer && rawFileBuffer.type === 'Buffer' && Array.isArray((rawFileBuffer as any).data)) {
+      fileBuffer = Buffer.from((rawFileBuffer as any).data);
+    } else if (rawFileBuffer && typeof rawFileBuffer === 'object' && Array.isArray((rawFileBuffer as any).data)) {
+      fileBuffer = Buffer.from((rawFileBuffer as any).data);
+    } else if (typeof rawFileBuffer === 'string') {
+      try {
+        fileBuffer = Buffer.from(rawFileBuffer, 'base64');
+      } catch {
+        fileBuffer = Buffer.from(rawFileBuffer, 'utf-8');
+      }
+    } else {
+      throw new Error('Unsupported fileBuffer type in job data');
+    }
+
+    // Stream the buffer in smaller slices so 'data' events arrive progressively
+    let _offset = 0;
+    const CHUNK_SIZE = 64 * 1024; // 64KB
+    const stream = new Readable({
+      read() {
+        if (_offset >= fileBuffer.length) {
+          this.push(null);
+          return;
+        }
+        const end = Math.min(_offset + CHUNK_SIZE, fileBuffer.length);
+        const chunk = fileBuffer.slice(_offset, end);
+        _offset = end;
+        this.push(chunk);
+      }
+    });
+
+    let headers: string[] = [];
+    let batchRecords: any[] = [];
+    let totalInserted = 0;
+    let buffer = '';
+    let isHeaderProcessed = false;
+    let lineCount = 0;
+    const totalBytes = fileBuffer.length;
+    let processedBytes = 0;
+    let pendingBatchPromise: Promise<any> | null = null;
+
+    return new Promise((resolve, reject) => {
+      stream.on('data', async (chunk: Buffer) => {
+        try {
+          stream.pause();
+
+          buffer += chunk.toString('utf-8');
+          const lines = buffer.split('\n');
+          buffer = lines[lines.length - 1];
+
+          // update processed bytes and progress
+          processedBytes += (chunk as Buffer).length;
+          const percent = totalBytes > 0 ? Math.min(100, Math.floor((processedBytes / totalBytes) * 100)) : 0;
+          try { job.progress(percent); } catch (e) { /* ignore */ }
+          try {
+            await this.importJobRepo.update(importJobId, { progress: percent });
+          } catch (e) { /* ignore */ }
+
+          for (let i = 0; i < lines.length - 1; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            if (!isHeaderProcessed) {
+              headers = line.split('\t').map(h => h.trim());
+              isHeaderProcessed = true;
+              continue;
+            }
+
+            lineCount++;
+
+            const vals = line.split('\t');
+            if (vals.length !== headers.length) continue;
+
+            const row: any = {};
+            headers.forEach((h, idx) => {
+              row[h] = vals[idx]?.trim() || '';
+            });
+
+            const record = {
+              import_job_id: importJobId,
+              kode_rs: row.KODE_RS || null,
+              kelas_rs: row.KELAS_RS || null,
+              kelas_rawat: row.KELAS_RAWAT || null,
+              kode_tarif: row.KODE_TARIF || null,
+              ptd: row.PTD || null,
+              admission_date: parseInaDate(row.ADMISSION_DATE),
+              discharge_date: parseInaDate(row.DISCHARGE_DATE),
+              birth_date: parseInaDate(row.BIRTH_DATE),
+              birth_weight: row.BIRTH_WEIGHT || null,
+              sex: row.SEX || null,
+              discharge_status: row.DISCHARGE_STATUS || null,
+              diaglist: row.DIAGLIST || null,
+              proclist: row.PROCLIST || null,
+              adl1: row.ADL1 || null,
+              adl2: row.ADL2 || null,
+              in_sp: null,
+              in_sr: null,
+              in_si: null,
+              in_sd: null,
+              inacbg: row.INACBG || null,
+              subacute: null,
+              chronic: null,
+              sp: null,
+              sr: null,
+              si: null,
+              sd: null,
+              deskripsi_inacbg: row.DESKRIPSI_INACBG || null,
+              tarif_inacbg: Number(row.TARIF_INACBG || 0),
+              tarif_subacute: 0,
+              tarif_chronic: 0,
+              deskripsi_sp: null,
+              tarif_sp: 0,
+              deskripsi_sr: null,
+              tarif_sr: 0,
+              deskripsi_si: null,
+              tarif_si: 0,
+              deskripsi_sd: null,
+              tarif_sd: 0,
+              total_tarif: Number(row.TOTAL_TARIF || 0),
+              tarif_rs: Number(row.TARIF_RS || 0),
+              tarif_poli_eks: Number(row.TARIF_POLI_EKS || 0),
+              los: Number(row.LOS || 0),
+              icu_indikator: Number(row.ICU_INDIKATOR || 0),
+              icu_los: Number(row.ICU_LOS || 0),
+              vent_hour: Number(row.VENT_HOUR || 0),
+              nama_pasien: row.NAMA_PASIEN || null,
+              mrn: row.MRN || null,
+              umur_tahun: Number(row.UMUR_TAHUN || 0),
+              umur_hari: Number(row.UMUR_HARI || 0),
+              dpjp: row.DPJP || null,
+              sep: row.SEP || null,
+              nokartu: row.NOKARTU || null,
+              payor_id: row.PAYOR_ID || null,
+              coder_id: row.CODER_ID || null,
+              versi_inacbg: row.VERSI_INACBG || null,
+              versi_grouper: row.VERSI_GROUPER || null,
+              c1: null,
+              c2: null,
+              c3: null,
+              c4: row.C4 || null,
+              prosedur_non_bedah: 0,
+              prosedur_bedah: 0,
+              konsultasi: 0,
+              tenaga_ahli: 0,
+              keperawatan: 0,
+              penunjang: 0,
+              radiologi: 0,
+              laboratorium: 0,
+              pelayanan_darah: 0,
+              rehabilitasi: 0,
+              kamar_akomodasi: 0,
+              rawat_intensif: 0,
+              obat: 0,
+              alkes: 0,
+              bmhp: 0,
+              sewa_alat: 0,
+              obat_kronis: 0,
+              obat_kemo: 0,
+              severity_level: row.C4 || null,
+              raw_json: row,
+            };
+
+            batchRecords.push(record);
+
+            if (batchRecords.length >= batchSize) {
+              // Track the batch insert promise and await its completion
+              const recordsToBatch = batchRecords;
+              batchRecords = [];
+              
+              pendingBatchPromise = this.insertBatch(recordsToBatch)
+                .then(() => {
+                  totalInserted += recordsToBatch.length;
+                  // update progress after batch insert and update ImportJob processed_records
+                  const percentAfterInsert = totalBytes > 0 ? Math.min(100, Math.floor((processedBytes / totalBytes) * 100)) : 0;
+                  try { job.progress(percentAfterInsert); } catch (e) { /* ignore */ }
+                  console.log(`[Import Job ${importJobId}] Batch inserted. Current total: ${totalInserted}, progress: ${percentAfterInsert}%`);
+                  return this.importJobRepo.update(importJobId, {
+                    processed_records: totalInserted,
+                    progress: percentAfterInsert,
+                  });
+                })
+                .catch((e) => console.error(`[Import Job ${importJobId}] Error updating batch progress:`, e));
+            }
+          }
+
+          stream.resume();
+        } catch (error) {
+          stream.destroy();
+          reject(error);
+        }
+      });
+
+      stream.on('end', async () => {
+        try {
+          // Wait for any pending batch operation to complete
+          if (pendingBatchPromise) {
+            await pendingBatchPromise;
+          }
+
+          // Insert remaining records in buffer
+          if (batchRecords.length > 0) {
+            await this.insertBatch(batchRecords);
+            totalInserted += batchRecords.length;
+          }
+
+          const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+          console.log(`[Import Job ${importJobId}] Stream ended. Final count: ${totalInserted}`);
+
+          // Update ImportJob with final status and counts - ATOMIC UPDATE
+          const result = await this.importJobRepo.update(importJobId, {
+            status: 'completed',
+            total_records: totalInserted,
+            processed_records: totalInserted,
+            progress: 100,
+            completed_at: new Date(),
+          });
+          console.log(`[Import Job ${importJobId}] Updated ${result.affected} rows: total_records=${totalInserted}, processed_records=${totalInserted}`);
+
+          resolve({
+            message: RESPONSE_MESSAGE.JOB.FINISHED,
+            fileName,
+            total: totalInserted,
+            duration: `${duration} seconds`,
+          });
+        } catch (error) {
+          console.error(`[Import Job ${importJobId}] Error on stream end:`, error);
+          // Update ImportJob with failed status
+          await this.importJobRepo.update(importJobId, {
+            status: 'failed',
+            completed_at: new Date(),
+            progress: 0,
+          }).catch((e) => console.error(`[Import Job ${importJobId}] Error updating failed status:`, e));
+          reject(error);
+        }
+      });
+
+      stream.on('error', async (error) => {
+        // Update ImportJob with error status
+        await this.importJobRepo.update(importJobId, {
+          status: 'failed',
+          completed_at: new Date(),
+          progress: 0,
+        }).catch(() => {});
+        reject(error);
+      });
+    });
+  }
+
+  private async insertBatch(records: any[]) {
+    if (records.length === 0) return;
+
+    try {
+      await this.claimsRepo.createQueryBuilder()
+        .insert()
+        .into(Claim)
+        .values(records)
+        .execute();
+
+      console.log(`✓ Inserted ${records.length} records`);
+    } catch (error) {
+      console.error('Insert error:', error);
+      throw error;
+    }
+  }
+}
