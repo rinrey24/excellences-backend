@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ClaimsModule } from './claims/claims.module';
+import { HospitalsModule } from './hospitals/hospitals.module';
 
 @Module({
   imports: [
@@ -40,6 +41,8 @@ import { ClaimsModule } from './claims/claims.module';
     AuthModule,
 
     ClaimsModule,
+
+    HospitalsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

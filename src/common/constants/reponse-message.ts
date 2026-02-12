@@ -12,7 +12,15 @@ export const RESPONSE_MESSAGE = {
     DELETED: 'User deleted successfully',
     NOT_FOUND: 'User not found',
   },
-  
+
+  HOSPITAL: {
+    FETCHED: 'Hospital fetched successfully',
+    CREATED: 'Hospital created successfully',
+    UPDATED: 'Hospital updated successfully',
+    DELETED: 'Hospital deleted successfully',
+    NOT_FOUND: 'Hospital not found',
+  },
+
   JOB: {
     FETCHED: 'Job fetched successfully',
     CREATED: 'Job created successfully', 
