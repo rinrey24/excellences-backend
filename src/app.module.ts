@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ClaimsModule } from './claims/claims.module';
 import { HospitalsModule } from './hospitals/hospitals.module';
+import { RulesModule } from './rules/rules.module';
 
 @Module({
   imports: [
@@ -43,6 +44,8 @@ import { HospitalsModule } from './hospitals/hospitals.module';
     ClaimsModule,
 
     HospitalsModule,
+
+    RulesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

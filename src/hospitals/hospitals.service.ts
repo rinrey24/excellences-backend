@@ -22,7 +22,7 @@ export class HospitalsService {
       });
 
       if (getHospitalFromDB){
-          throw new BusinessException(RESPONSE_MESSAGE.HOSPITAL.NOT_FOUND);
+          throw new BusinessException(RESPONSE_MESSAGE.HOSPITAL.EXIST);
       }
 
       await this.hospitalRepo.save(hospital);
@@ -70,6 +70,7 @@ export class HospitalsService {
   }
 
   async update(kode_rs: string, dto: UpdateHospitalDto) {
+    try{
     const hospital = await this.findOneEntity(kode_rs);
 
     Object.assign(hospital, dto);
@@ -79,5 +80,10 @@ export class HospitalsService {
       message: RESPONSE_MESSAGE.HOSPITAL.UPDATED,
       data: hospital,
     };
+    } catch (err){
+      console.error(err)
+      throw err
+    }
   }
+  
 }

@@ -14,4 +14,7 @@ export class UpdateHospitalDto extends PartialType(CreateHospitalDto) {
 
     @IsOptional()
     address?: string;
+    
+    @IsOptional()
+    phone?: string;
 }

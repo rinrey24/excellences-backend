@@ -1,4 +1,4 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsOptional } from "class-validator";
 
 export class CreateHospitalDto {
     @IsNotEmpty()
@@ -12,4 +12,7 @@ export class CreateHospitalDto {
 
     @IsNotEmpty()
     address!: string;
+    
+    @IsOptional()
+    phone!: string;
 }
