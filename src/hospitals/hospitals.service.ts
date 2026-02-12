@@ -14,13 +14,28 @@ export class HospitalsService {
   ) {}
 
   async create(createHospitalDto: CreateHospitalDto) {
-    const hospital = this.hospitalRepo.create(createHospitalDto);
-    await this.hospitalRepo.save(hospital);
+    try{
+      const hospital = this.hospitalRepo.create(createHospitalDto);
 
-    return {
-      message: RESPONSE_MESSAGE.HOSPITAL.CREATED,
-      data: hospital,
-    };
+      const getHospitalFromDB = await this.hospitalRepo.findOne({
+        where: { kode_rs: hospital.kode_rs },
+      });
+
+      if (getHospitalFromDB){
+          throw new BusinessException(RESPONSE_MESSAGE.HOSPITAL.NOT_FOUND);
+      }
+
+      await this.hospitalRepo.save(hospital);
+  
+      return {
+        message: RESPONSE_MESSAGE.HOSPITAL.CREATED,
+        data: hospital,
+      };
+    }catch (err){
+      console.error(err)
+      throw err
+    }
+    
   }
 
   async findAll() {
@@ -32,9 +47,9 @@ export class HospitalsService {
   }
 
   /** 🔹 INTERNAL – RETURN ENTITY ONLY */
-  async findOneEntity(id: number): Promise<Hospital> {
+  async findOneEntity(kode_rs: string): Promise<Hospital> {
     const hospital = await this.hospitalRepo.findOne({
-      where: { kode_rs: id },
+      where: { kode_rs: kode_rs },
     });
 
     if (!hospital) {
@@ -45,8 +60,8 @@ export class HospitalsService {
   }
 
   /** 🔹 API RESPONSE */
-  async findOne(id: number) {
-    const hospital = await this.findOneEntity(id);
+  async findOne(kode_rs: string) {
+    const hospital = await this.findOneEntity(kode_rs);
 
     return {
       message: RESPONSE_MESSAGE.HOSPITAL.FETCHED,
@@ -54,8 +69,8 @@ export class HospitalsService {
     };
   }
 
-  async update(id: number, dto: UpdateHospitalDto) {
-    const hospital = await this.findOneEntity(id);
+  async update(kode_rs: string, dto: UpdateHospitalDto) {
+    const hospital = await this.findOneEntity(kode_rs);
 
     Object.assign(hospital, dto);
     await this.hospitalRepo.save(hospital);

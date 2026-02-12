@@ -32,7 +32,7 @@ import { HospitalsModule } from './hospitals/hospitals.module';
         password: config.getOrThrow('DB_PASSWORD'),
         database: config.getOrThrow('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: false,
       }),
     }),
 

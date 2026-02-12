@@ -1,9 +1,9 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('hospitals')
 export class Hospital {
-    @PrimaryGeneratedColumn()
-    kode_rs!: number;
+    @PrimaryColumn()
+    kode_rs!: string;
 
     @Column()
     name!: string;
@@ -14,7 +14,7 @@ export class Hospital {
     @Column()
     address!: string;
 
-    @Column()
+    @Column({ nullable: true})
     phone!: string;
 
     @CreateDateColumn()

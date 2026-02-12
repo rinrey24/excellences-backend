@@ -18,6 +18,7 @@ export const RESPONSE_MESSAGE = {
     CREATED: 'Hospital created successfully',
     UPDATED: 'Hospital updated successfully',
     DELETED: 'Hospital deleted successfully',
+    EXIST: 'Hospital already exist',
     NOT_FOUND: 'Hospital not found',
   },
 

@@ -22,14 +22,14 @@ export class HospitalsController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.hospitalsService.findOne(+id);
+  findOne(@Param('id') kode_rs: string) {
+    return this.hospitalsService.findOne(kode_rs);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateHospitalDto: UpdateHospitalDto) {
-    return this.hospitalsService.update(+id, updateHospitalDto);
+  update(@Param('id') kode_rs: string, @Body() updateHospitalDto: UpdateHospitalDto) {
+    return this.hospitalsService.update(kode_rs, updateHospitalDto);
   }
 
 }

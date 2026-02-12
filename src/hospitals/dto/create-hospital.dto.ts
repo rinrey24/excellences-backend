@@ -2,7 +2,7 @@ import { IsNotEmpty } from "class-validator";
 
 export class CreateHospitalDto {
     @IsNotEmpty()
-    kode_rs!: number;
+    kode_rs!: string;
 
     @IsNotEmpty()
     name!: string;
