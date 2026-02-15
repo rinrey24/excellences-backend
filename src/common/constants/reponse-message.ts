@@ -22,6 +22,24 @@ export const RESPONSE_MESSAGE = {
     NOT_FOUND: 'Hospital not found',
   },
 
+  OVERSTAY: {
+    FETCHED: 'Overstay fetched successfully',
+    CREATED: 'Overstay created successfully',
+    UPDATED: 'Overstay updated successfully',
+    DELETED: 'Overstay deleted successfully',
+    EXIST: 'Overstay already exist',
+    NOT_FOUND: 'Overstay not found',
+  },
+  
+  RULE: {
+    FETCHED: 'Hospital fetched successfully',
+    CREATED: 'Hospital created successfully',
+    UPDATED: 'Hospital updated successfully',
+    DELETED: 'Hospital deleted successfully',
+    EXIST: 'Hospital already exist',
+    NOT_FOUND: 'Hospital not found',
+  },
+
   JOB: {
     FETCHED: 'Job fetched successfully',
     CREATED: 'Job created successfully', 

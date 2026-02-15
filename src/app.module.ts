@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { ClaimsModule } from './claims/claims.module';
 import { HospitalsModule } from './hospitals/hospitals.module';
 import { RulesModule } from './rules/rules.module';
+import { OverstaysModule } from './overstays/overstays.module';
 
 @Module({
   imports: [
@@ -46,6 +47,8 @@ import { RulesModule } from './rules/rules.module';
     HospitalsModule,
 
     RulesModule,
+
+    OverstaysModule,
   ],
   controllers: [AppController],
   providers: [AppService],
