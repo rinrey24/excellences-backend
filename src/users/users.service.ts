@@ -34,7 +34,7 @@ export class UsersService {
         };
     }
 
-    async findOne(id: number){
+    async findOne(id: string){
         const user = await this.userRepo.findOne({ where: { id}});
         if (!user) throw new BusinessException(RESPONSE_MESSAGE.USER.NOT_FOUND);
         return user;
@@ -46,7 +46,7 @@ export class UsersService {
         return user;
     }
 
-    async update(id: number,dto: UpdateUserDto){
+    async update(id: string,dto: UpdateUserDto){
         const user = await this.findOne(id);
         Object.assign(user,dto);
         return this.userRepo.save(user);

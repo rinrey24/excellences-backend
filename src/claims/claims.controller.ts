@@ -80,4 +80,10 @@ export class ClaimsController {
     return this.claimsService.getClaimByJobId(import_job_id, pageNum, limitNum);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('analyze')
+  async analyzeClaim(@Body('import_job_id') import_job_id: any) {
+    return this.claimsService.analyzeClaim(import_job_id);
+  }
+
 }

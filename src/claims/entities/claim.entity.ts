@@ -244,6 +244,9 @@ export class Claim {
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   severity_level!: string;
+  
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  kategori!: string;
 
   @Column({ type: 'jsonb', nullable: true })
   raw_json!: any;

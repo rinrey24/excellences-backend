@@ -21,7 +21,7 @@ export class UsersController {
 
     @UseGuards(JwtAuthGuard)
     @Get(':id')
-    findOne(@Param('id') id: number) {
+    findOne(@Param('id') id: string) {
         return this.usersService.findOne(id);
     }
 
@@ -33,7 +33,7 @@ export class UsersController {
 
     @UseGuards(JwtAuthGuard)
     @Put(':id')
-    update(@Param('id') id: number, @Body() dto: UpdateUserDto) {
-        return this.usersService.update(+id,dto);
+    update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+        return this.usersService.update(id,dto);
     }
 }

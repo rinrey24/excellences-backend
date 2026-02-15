@@ -10,12 +10,16 @@ import { ClaimsModule } from './claims/claims.module';
 import { HospitalsModule } from './hospitals/hospitals.module';
 import { RulesModule } from './rules/rules.module';
 import { OverstaysModule } from './overstays/overstays.module';
+import { WinstonModule } from 'nest-winston';
+import { winstonLoggerOptions } from './common/logger/winston.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    WinstonModule.forRoot(winstonLoggerOptions),
 
     BullModule.forRoot({
       redis: {

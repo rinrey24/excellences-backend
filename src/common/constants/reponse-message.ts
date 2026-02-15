@@ -55,6 +55,7 @@ export const RESPONSE_MESSAGE = {
     CREATED: 'Claim created successfully',  
     UPDATED: 'Claim updated successfully',
     DELETED: 'Claim deleted successfully',
+    ANALYZED: 'Claim analyzed successfully',
     NOT_FOUND: 'Claim not found',
   },
 

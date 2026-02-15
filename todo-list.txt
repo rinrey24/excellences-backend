@@ -1,4 +1,7 @@
-1. rapihkan response di claim -done
+1. rapihkan response di claim [x]
+2. seragamkan semua id menjadi uuid [x] (pengecualian untuk tabel user, dan claim)
+3. buat tabel transaksinya [] (satu tabel results jadi satu atau setiap modul satu?)
+
 
 fokus V2
 
@@ -15,3 +18,5 @@ v2:
 
 v3:
 1. ada master 
+
+

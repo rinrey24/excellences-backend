@@ -6,10 +6,12 @@ import { ClaimsController } from './claims.controller';
 import { Claim } from './entities/claim.entity';
 import { ImportJob } from './entities/import.entity';
 import { ClaimsImportProcessor } from './claims-import.processor';
+import { DiagnoseTransaction } from './entities/diagnose-transaction.entity';
+import { ProceduresTransaction } from './entities/procedures-transaction.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Claim, ImportJob]),
+    TypeOrmModule.forFeature([Claim, ImportJob,DiagnoseTransaction,ProceduresTransaction]),
     BullModule.registerQueue({
       name: 'claims-import',
     }),

@@ -1,15 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import type { Queue } from 'bull';
 import { Claim } from './entities/claim.entity';
 import { ImportJob } from './entities/import.entity';
 import { RESPONSE_MESSAGE } from 'src/common/constants/reponse-message';
 import { formatPaginatedResponse } from 'src/common/utils/pagination.util';
+import { ProceduresTransaction } from './entities/procedures-transaction.entity';
+import { DiagnoseTransaction } from './entities/diagnose-transaction.entity';
 
 @Injectable()
 export class ClaimsService {
+  private readonly logger = new Logger(ClaimsService.name);
+
   constructor(
     @InjectRepository(Claim)
     private readonly repo: Repository<Claim>,
@@ -46,6 +50,11 @@ export class ClaimsService {
         },
       },
     );
+
+    this.logger.log(
+      `[Import Job ${importJob.id}] queued (bullJobId=${String(job.id)})`,
+    );
+
 
     return {
       message: RESPONSE_MESSAGE.JOB.QUEUED,
@@ -86,7 +95,7 @@ export class ClaimsService {
       this.importJobRepo.count()
     ]);
 
-    return formatPaginatedResponse(data, total, page, limit);
+    return formatPaginatedResponse(RESPONSE_MESSAGE.JOB.FETCHED,data, total, page, limit);
   }
   
   async getImportJobsById(id: string) {
@@ -103,7 +112,7 @@ export class ClaimsService {
       this.repo.count()
     ]);
 
-    return formatPaginatedResponse(data, total, page, limit);
+    return formatPaginatedResponse(RESPONSE_MESSAGE.CLAIM.FETCHED, data, total, page, limit);
   }
 
   async getClaimByJobId(import_job_id: string, page: number = 1, limit: number = 100) {
@@ -117,7 +126,35 @@ export class ClaimsService {
       this.repo.count({ where: { import_job_id } })
     ]);
 
-    return formatPaginatedResponse(data, total, page, limit);
+    return formatPaginatedResponse(RESPONSE_MESSAGE.CLAIM.FETCHED,data, total, page, limit);
   }
+
+  async analyzeClaim(import_job_id: any) {
+    
+    return {
+      message: RESPONSE_MESSAGE.CLAIM.ANALYZED,
+      data: await this.rajalVsRanapAnalysis(import_job_id)
+    }
+
+  }
+
+  //excellences v2
+  async rajalVsRanapAnalysis(import_job_id: any) {
+    const dataRajalVsRanapAnalysis = await this.repo.query(`
+      SELECT admission_date,nama_pasien ,mrn from claims where import_job_id=$1
+      group by admission_date,nama_pasien,mrn
+      having count(admission_date)>1
+      order by admission_date  asc
+      `,[import_job_id]);
+      
+      return dataRajalVsRanapAnalysis;
+  };
+
+  //excellences v3
+  async overstayedAnalysis(import_job_id: any) {
+
+  }
+
+
 
 }

@@ -7,6 +7,8 @@ import { ImportJob } from './entities/import.entity';
 import { parseInaDate } from '../common/utils/date.util';
 import { Readable } from 'stream';
 import { RESPONSE_MESSAGE } from 'src/common/constants/reponse-message';
+import { DiagnoseTransaction } from './entities/diagnose-transaction.entity';
+import { ProceduresTransaction } from './entities/procedures-transaction.entity';
 
 @Processor('claims-import')
 export class ClaimsImportProcessor {
@@ -15,6 +17,10 @@ export class ClaimsImportProcessor {
     private readonly claimsRepo: Repository<Claim>,
     @InjectRepository(ImportJob)
     private readonly importJobRepo: Repository<ImportJob>,
+    @InjectRepository(DiagnoseTransaction)
+    private readonly diagTrsRepo: Repository<DiagnoseTransaction>,
+    @InjectRepository(ProceduresTransaction)
+    private readonly procTrsRepo: Repository<ProceduresTransaction>,
   ) {}
 
   @Process()
@@ -108,6 +114,48 @@ export class ClaimsImportProcessor {
             headers.forEach((h, idx) => {
               row[h] = vals[idx]?.trim() || '';
             });
+            
+            // if (row.INACBG.at(-1) == '0'){
+              
+            // }
+
+            // Parse optional JSON payload from C2 safely.
+            // Some rows may contain non-JSON values, so do not fail the whole import.
+            let billingGroup: Record<string, any> = {};
+            if (row.C2) {
+              const index = row.C2.lastIndexOf('##');
+              if (index !== -1) {
+                const jsonString = row.C2.substring(index + 2).trim();
+                if (jsonString) {
+                  try {
+                    const parsedJson = JSON.parse(jsonString);
+                    billingGroup = parsedJson?.billing_group ?? {};
+                  } catch {
+                    billingGroup = {};
+                  }
+                }
+              }
+            }
+
+            const procedure_amt = Number(billingGroup.procedure_amt || 0);
+            const surgical_amt = Number(billingGroup.surgical_amt || 0);
+            const consul_amt = Number(billingGroup.consul_amt || 0);
+            const expert_amt = Number(billingGroup.expert_amt || 0);
+            const nursing_amt = Number(billingGroup.nursing_amt || 0);
+            const ancillary_amt = Number(billingGroup.ancillary_amt || 0);
+            const blood_amt = Number(billingGroup.blood_amt || 0);
+            const laboratory_amt = Number(billingGroup.laboratory_amt || 0);
+            const radiology_amt = Number(billingGroup.radiology_amt || 0);
+            const rehab_amt = Number(billingGroup.rehab_amt || 0);
+            const room_amt = Number(billingGroup.room_amt || 0);
+            const intensive_amt = Number(billingGroup.intensive_amt || 0);
+            const drug_amt = Number(billingGroup.drug_amt || 0);
+            const device_amt = Number(billingGroup.device_amt || 0);
+            const consumable_amt = Number(billingGroup.consumable_amt || 0);
+            const device_rent_amt = Number(billingGroup.device_rent_amt || 0);
+            const drug_chronic_amt = Number(billingGroup.drug_chronic_amt || 0);
+            const drug_chemo_amt = Number(billingGroup.drug_chemo_amt || 0);
+
 
             const record = {
               import_job_id: importJobId,
@@ -171,25 +219,26 @@ export class ClaimsImportProcessor {
               c2: null,
               c3: null,
               c4: row.C4 || null,
-              prosedur_non_bedah: 0,
-              prosedur_bedah: 0,
-              konsultasi: 0,
-              tenaga_ahli: 0,
-              keperawatan: 0,
-              penunjang: 0,
-              radiologi: 0,
-              laboratorium: 0,
-              pelayanan_darah: 0,
-              rehabilitasi: 0,
-              kamar_akomodasi: 0,
-              rawat_intensif: 0,
-              obat: 0,
-              alkes: 0,
-              bmhp: 0,
-              sewa_alat: 0,
-              obat_kronis: 0,
-              obat_kemo: 0,
-              severity_level: row.C4 || null,
+              prosedur_non_bedah: procedure_amt,
+              prosedur_bedah: surgical_amt,
+              konsultasi: consul_amt,
+              tenaga_ahli: expert_amt,
+              keperawatan: nursing_amt,
+              penunjang: ancillary_amt,
+              radiologi: blood_amt,
+              laboratorium: laboratory_amt,
+              pelayanan_darah: radiology_amt,
+              rehabilitasi: rehab_amt,
+              kamar_akomodasi: room_amt,
+              rawat_intensif: intensive_amt,
+              obat: drug_amt,
+              alkes: device_amt,
+              bmhp: consumable_amt,
+              sewa_alat: device_rent_amt,
+              obat_kronis: drug_chronic_amt,
+              obat_kemo: drug_chemo_amt,
+              severity_level: row.INACBG.at(-1) || null,
+              kategori: row.INACBG.at(-1) === '0' ? 'Rawat Jalan' : 'Rawat Inap',
               raw_json: row,
             };
 
@@ -218,6 +267,7 @@ export class ClaimsImportProcessor {
 
           stream.resume();
         } catch (error) {
+          console.log(error);
           stream.destroy();
           reject(error);
         }
@@ -283,11 +333,36 @@ export class ClaimsImportProcessor {
     if (records.length === 0) return;
 
     try {
-      await this.claimsRepo.createQueryBuilder()
+      const result = await this.claimsRepo.createQueryBuilder()
         .insert()
         .into(Claim)
         .values(records)
+        .returning(['id', 'diaglist', 'proclist']) // ambil id claim yang baru dibuat
         .execute();
+
+        const insertedClaims = result.raw as Array<{ id: number; diaglist: string | null }>;
+          const diagRows: Array<{ claim_id: number; diagnose_code: string }> = [];
+        for (const claim of insertedClaims) {
+          if (!claim.diaglist) continue;
+          for (const code of claim.diaglist.split(';').map((v) => v.trim()).filter(Boolean)) {
+            diagRows.push({ claim_id: claim.id, diagnose_code: code });
+          }
+        }
+      if (diagRows.length > 0) {
+        await this.diagTrsRepo.insert(diagRows);
+      }
+
+        const insertedProc = result.raw as Array<{ id: number; proclist: string | null }>;
+        const procRows: Array<{ claim_id: number; procedure_code: string }> = [];
+        for (const claim of insertedProc) {
+          if (!claim.proclist) continue;  
+          for (const code of claim.proclist.split(';').map((v) => v.trim()).filter(Boolean)) {
+            procRows.push({ claim_id: claim.id, procedure_code: code });
+          }
+        }
+      if (procRows.length > 0) {
+        await this.procTrsRepo.insert(procRows);
+      }
 
       console.log(`✓ Inserted ${records.length} records`);
     } catch (error) {
@@ -295,4 +370,5 @@ export class ClaimsImportProcessor {
       throw error;
     }
   }
+
 }

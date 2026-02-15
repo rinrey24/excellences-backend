@@ -8,11 +8,13 @@ export interface PaginationMeta {
 }
 
 export interface PaginatedResponse<T> {
+  message: string;
   data: T[];
   pagination: PaginationMeta;
 }
 
 export function formatPaginatedResponse<T>(
+  message: string,
   data: T[],
   total: number,
   page: number,
@@ -21,6 +23,7 @@ export function formatPaginatedResponse<T>(
   const totalPages = Math.ceil(total / limit);
 
   return {
+    message,
     data,
     pagination: {
       page,
