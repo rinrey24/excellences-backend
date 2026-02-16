@@ -86,4 +86,17 @@ export class ClaimsController {
     return this.claimsService.analyzeClaim(import_job_id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('analyze/:import_job_id')
+  async getAnalyzedClaim(
+    @Param('import_job_id') import_job_id: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '100',
+    @Query('group_results') group_results: string = 'false'
+  ) {
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(1000, Math.max(1, parseInt(limit) || 100));
+    return this.claimsService.getAnalyzedClaim(import_job_id, pageNum, limitNum, group_results ); 
+  }
+
 }

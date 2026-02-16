@@ -17,6 +17,9 @@ export class CreateOverstayDto {
 
     @IsOptional()
     description?: string;
+    
+    @IsNotEmpty()
+    is_overstay!: boolean;
 
     @IsNotEmpty()
     is_active!: boolean;

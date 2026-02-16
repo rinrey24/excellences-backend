@@ -247,6 +247,12 @@ export class Claim {
   
   @Column({ type: 'varchar', length: 50, nullable: true })
   kategori!: string;
+  
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  cmg!: string;
+  
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  tipe_kasus!: string;
 
   @Column({ type: 'jsonb', nullable: true })
   raw_json!: any;

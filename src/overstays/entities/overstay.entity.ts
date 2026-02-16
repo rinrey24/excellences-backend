@@ -16,6 +16,9 @@ export class Overstay {
 
     @Column({ type: 'varchar', length: 500, nullable: true })
     description?: string;
+    
+    @Column({ type: 'boolean', default: true })
+    is_overstay!: boolean;
 
     @Column({ type: 'boolean', default: true })
     is_active!: boolean;
