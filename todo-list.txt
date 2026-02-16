@@ -7,11 +7,11 @@ fokus V2
 
 logic excellences:
 general:
-1. ambil kategori (rawat jalan / rawat inap) = =IF([@[Severity Level]]="";"";IF([@[Severity Level]]="0";"RAWAT JALAN";"RAWAT INAP"))
-2. tipe kasus = ambil nilai kedua dari code inacbg (ex. N-3-15-0 maka tipe kasusnya adalah 3)
-3. severity level = ambil nilai terakhir dari code inacbg (ex. N-3-15-0 maka severity levelnya adalah 0)
-4. Des. (description?) = Case-MIX Main Group - Code Inabg - Severity Level - Total Tarif (ex. N - N-3-15-0 - 0 - 941600)
-5. Case-MIX Main Group = ambil nilai pertama dari code inacbg (ex. N-3-15-0 maka severity levelnya adalah N)
+1. ambil kategori (rawat jalan / rawat inap) = =IF([@[Severity Level]]="";"";IF([@[Severity Level]]="0";"RAWAT JALAN";"RAWAT INAP")) [x]
+2. tipe kasus = ambil nilai kedua dari code inacbg (ex. N-3-15-0 maka tipe kasusnya adalah 3) [] (dari hardcode aja nanti)
+3. severity level = ambil nilai terakhir dari code inacbg (ex. N-3-15-0 maka severity levelnya adalah 0) [x] 
+4. Des. (description?) = Case-MIX Main Group - Code Inabg - Severity Level - Total Tarif (ex. N - N-3-15-0 - 0 - 941600) [] (dari hardcode aja nanti)
+5. Case-MIX Main Group = ambil nilai pertama dari code inacbg (ex. N-3-15-0 maka severity levelnya adalah N) [] (dari hardcode aja nanti)
 
 v2:
 1. rajal vs ranap hari yang sama = cek jika admission_date nya sama, dan nama_pasien sama, dan juga mrn nya sama maka masuk ke kategori ini

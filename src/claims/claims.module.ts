@@ -8,10 +8,12 @@ import { ImportJob } from './entities/import.entity';
 import { ClaimsImportProcessor } from './claims-import.processor';
 import { DiagnoseTransaction } from './entities/diagnose-transaction.entity';
 import { ProceduresTransaction } from './entities/procedures-transaction.entity';
+import { ClaimResult } from './entities/claim.results.entity';
+import { Overstay } from 'src/overstays/entities/overstay.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Claim, ImportJob,DiagnoseTransaction,ProceduresTransaction]),
+    TypeOrmModule.forFeature([Claim, ImportJob,DiagnoseTransaction,ProceduresTransaction,ClaimResult,Overstay]),
     BullModule.registerQueue({
       name: 'claims-import',
     }),

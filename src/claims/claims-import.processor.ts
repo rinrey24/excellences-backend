@@ -340,6 +340,7 @@ export class ClaimsImportProcessor {
         .returning(['id', 'diaglist', 'proclist']) // ambil id claim yang baru dibuat
         .execute();
 
+        //insert diagnosa
         const insertedClaims = result.raw as Array<{ id: number; diaglist: string | null }>;
           const diagRows: Array<{ claim_id: number; diagnose_code: string }> = [];
         for (const claim of insertedClaims) {
@@ -352,6 +353,7 @@ export class ClaimsImportProcessor {
         await this.diagTrsRepo.insert(diagRows);
       }
 
+      //insert procedure
         const insertedProc = result.raw as Array<{ id: number; proclist: string | null }>;
         const procRows: Array<{ claim_id: number; procedure_code: string }> = [];
         for (const claim of insertedProc) {
@@ -363,6 +365,10 @@ export class ClaimsImportProcessor {
       if (procRows.length > 0) {
         await this.procTrsRepo.insert(procRows);
       }
+
+      //insert claim results
+      // const insertedLos = result.raw as Array<{ id: number;los: number | null}>;
+      // const resultRows: Array<{claim_id: number; los: number}> = [];
 
       console.log(`✓ Inserted ${records.length} records`);
     } catch (error) {
