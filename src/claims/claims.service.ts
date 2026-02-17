@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, type DeepPartial } from 'typeorm';
+import { Like, Repository, type DeepPartial } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import type { Queue } from 'bull';
 import { Claim } from './entities/claim.entity';
@@ -10,6 +10,8 @@ import { formatPaginatedResponse } from 'src/common/utils/pagination.util';
 import { ClaimResult } from './entities/claim.results.entity';
 import { Overstay } from 'src/overstays/entities/overstay.entity';
 import { BusinessException } from 'src/common/exceptions/business.exception';
+import { DiagnoseTransaction } from './entities/diagnose-transaction.entity';
+import { ProceduresTransaction } from './entities/procedures-transaction.entity';
 
 @Injectable()
 export class ClaimsService {
@@ -26,9 +28,17 @@ export class ClaimsService {
     private readonly claimResultsRepo: Repository<ClaimResult>,
     @InjectRepository(Overstay)
     private readonly overStayRepo: Repository<Overstay>,
+    @InjectRepository(DiagnoseTransaction)
+    private readonly diagnoseTransactionRepo: Repository<DiagnoseTransaction>,
+    @InjectRepository(ProceduresTransaction)
+    private readonly proceduresTransactionRepo: Repository<ProceduresTransaction>,
   ) {}
 
   async queueFileImport(file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException(RESPONSE_MESSAGE.VALIDATION.FILE_NOT_FOUND);
+    }
+
     // Create ImportJob record with UUID
     const importJob = await this.importJobRepo.save({
       filename: file.originalname,
@@ -60,10 +70,7 @@ export class ClaimsService {
       `[Import Job ${importJob.id}] queued (bullJobId=${String(job.id)})`,
     );
 
-    return {
-      message: RESPONSE_MESSAGE.JOB.QUEUED,
-      jobId: importJob.id,
-    };
+    return importJob.id;
   }
 
   async getJobStatus(jobId: string) {
@@ -71,11 +78,11 @@ export class ClaimsService {
       where: { id: jobId },
     });
     if (!importJob) {
-      return { message: RESPONSE_MESSAGE.JOB.NOT_FOUND };
+        throw new BusinessException(RESPONSE_MESSAGE.JOB.NOT_FOUND);
     }
 
     return {
-      job_id: importJob.id,
+      import_job_id: importJob.id,
       file_name: importJob.filename,
       status: importJob.status,
       total_records: importJob.total_records,
@@ -91,7 +98,7 @@ export class ClaimsService {
     return this.claimRepo.save(claim);
   }
 
-  async getImportJobs(page: number = 1, limit: number = 100) {
+  async getImportJobs(page: number = 1, limit: number = 100, search: string = ''):Promise<[ImportJob[], number]> {
     const [data, total] = await Promise.all([
       this.importJobRepo.find({
         skip: (page - 1) * limit,
@@ -100,69 +107,51 @@ export class ClaimsService {
       }),
       this.importJobRepo.count(),
     ]);
-
-    return formatPaginatedResponse(
-      RESPONSE_MESSAGE.JOB.FETCHED,
-      data,
-      total,
-      page,
-      limit,
-    );
+    return [data, total];
   }
 
   async getImportJobsById(id: string) {
-    return this.importJobRepo.findOne({ where: { id } });
+    const importJob = await this.importJobRepo.findOne({ where: { id } });
+    if (!importJob) {
+      throw new BusinessException(RESPONSE_MESSAGE.JOB.NOT_FOUND);
+    }
+    return importJob;
   }
 
-  async getAllClaims(page: number = 1, limit: number = 100) {
-    const [data, total] = await Promise.all([
-      this.claimRepo.find({
-        skip: (page - 1) * limit,
-        take: limit,
-        order: { id: 'DESC' },
-      }),
-      this.claimRepo.count(),
-    ]);
-
-    return formatPaginatedResponse(
-      RESPONSE_MESSAGE.CLAIM.FETCHED,
-      data,
-      total,
-      page,
-      limit,
-    );
+  async getAllClaims(page: number = 1, limit: number = 100, search: string = ''): Promise<[Claim[], number]> {
+     const queryBuilder = this.claimRepo.createQueryBuilder('claim');
+    if (search) {
+      queryBuilder.where('claim.nama_pasien LIKE :search', { search: `%${search}%` });
+    }
+    const claims = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+    const total = await queryBuilder.getCount();
+    return [claims, total];
   }
 
   async getClaimByJobId(
     import_job_id: string,
     page: number = 1,
     limit: number = 100,
-  ) {
+    search: string = '',
+  ): Promise<[Claim[], number]> {
     const [data, total] = await Promise.all([
       this.claimRepo.find({
-        where: { import_job_id },
+        where: { import_job_id, nama_pasien: search ? Like(`%${search}%`) : undefined },
         skip: (page - 1) * limit,
         take: limit,
         order: { id: 'DESC' },
       }),
       this.claimRepo.count({ where: { import_job_id } }),
     ]);
-
-    return formatPaginatedResponse(
-      RESPONSE_MESSAGE.CLAIM.FETCHED,
-      data,
-      total,
-      page,
-      limit,
-    );
+    
+    return [data, total];
   }
 
   async analyzeClaim(import_job_id: string) {
-    const dataClaim = await this.claimRepo.find({
-      where: {
-        import_job_id: import_job_id,
-      },
-    });
+    const [dataClaim, _] = await this.getClaimByJobId(import_job_id, 1, 1);
 
     if (dataClaim.length === 0) {
       throw new BusinessException(RESPONSE_MESSAGE.CLAIM.NOT_FOUND);
@@ -181,10 +170,7 @@ export class ClaimsService {
     const dataDuplicateSameDay = await this.rajalVsRanapAnalysis(import_job_id);
     await this.claimResultsRepo.insert(dataDuplicateSameDay);
 
-    return {
-      message: RESPONSE_MESSAGE.CLAIM.ANALYZED,
-      data: [],
-    };
+    return import_job_id;
   }
 
   //excellences v2
@@ -295,7 +281,7 @@ export class ClaimsService {
     page: number = 1,
     limit: number = 100,
     group_results: string,
-  ) {
+  ): Promise<[ClaimResult[], number]> {
     const normalizedGroupResults =
       group_results && group_results !== 'false' ? group_results : undefined;
 
@@ -340,12 +326,21 @@ export class ClaimsService {
       baseQuery.clone().getCount(),
     ]);
 
-    return formatPaginatedResponse(
-      RESPONSE_MESSAGE.CLAIM.FETCHED,
-      data,
-      total,
-      page,
-      limit,
-    );
+    return [data, total];
+  }
+
+  async deleteClaimByJobId(import_job_id: string) {
+    const existingClaims = await this.claimRepo.find({
+      where: { import_job_id },
+    });
+    if (existingClaims.length === 0) {
+      throw new BusinessException(RESPONSE_MESSAGE.CLAIM.NOT_FOUND);
+    }
+    await this.importJobRepo.delete({ id: import_job_id });
+    await this.claimRepo.delete({ import_job_id });
+    await this.claimResultsRepo.delete({ import_job_id });
+    await this.diagnoseTransactionRepo.delete({ import_job_id });
+    await this.proceduresTransactionRepo.delete({ import_job_id });
+    return import_job_id;
   }
 }

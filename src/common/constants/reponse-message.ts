@@ -59,6 +59,26 @@ export const RESPONSE_MESSAGE = {
     NOT_FOUND: 'Claim not found',
   },
 
+  
+  DIAGNOSE: {
+    FETCHED: 'Diagnose fetched successfully',
+    CREATED: 'Diagnose created successfully',
+    UPDATED: 'Diagnose updated successfully',
+    DELETED: 'Diagnose deleted successfully',
+    EXIST: 'Diagnose already exist',
+    NOT_FOUND: 'Diagnose not found',
+  },
+
+  
+  PROCEDURE: {
+    FETCHED: 'Procedure fetched successfully',
+    CREATED: 'Procedure created successfully',
+    UPDATED: 'Procedure updated successfully',
+    DELETED: 'Procedure deleted successfully',
+    EXIST: 'Procedure already exist',
+    NOT_FOUND: 'Procedure not found',
+  },
+
   VALIDATION: {
     FAILED: 'Validation failed',
     FILE_NOT_FOUND: 'File not found',

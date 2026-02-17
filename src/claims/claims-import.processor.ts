@@ -344,11 +344,11 @@ export class ClaimsImportProcessor {
 
         //insert diagnosa
         const insertedClaims = result.raw as Array<{ id: number; diaglist: string | null }>;
-          const diagRows: Array<{ claim_id: number; diagnose_code: string }> = [];
+          const diagRows: Array<{ import_job_id: string; claim_id: number; diagnose_code: string }> = [];
         for (const claim of insertedClaims) {
           if (!claim.diaglist) continue;
           for (const code of claim.diaglist.split(';').map((v) => v.trim()).filter(Boolean)) {
-            diagRows.push({ claim_id: claim.id, diagnose_code: code });
+            diagRows.push({ import_job_id: records[0].import_job_id, claim_id: claim.id, diagnose_code: code });
           }
         }
       if (diagRows.length > 0) {
@@ -357,11 +357,11 @@ export class ClaimsImportProcessor {
 
       //insert procedure
         const insertedProc = result.raw as Array<{ id: number; proclist: string | null }>;
-        const procRows: Array<{ claim_id: number; procedure_code: string }> = [];
+        const procRows: Array<{ import_job_id: string; claim_id: number; procedure_code: string }> = [];
         for (const claim of insertedProc) {
           if (!claim.proclist) continue;  
           for (const code of claim.proclist.split(';').map((v) => v.trim()).filter(Boolean)) {
-            procRows.push({ claim_id: claim.id, procedure_code: code });
+            procRows.push({ import_job_id: records[0].import_job_id, claim_id: claim.id, procedure_code: code });
           }
         }
       if (procRows.length > 0) {

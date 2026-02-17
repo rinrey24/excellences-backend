@@ -5,6 +5,7 @@ import { Overstay } from './entities/overstay.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RESPONSE_MESSAGE } from 'src/common/constants/reponse-message';
+import { BusinessException } from 'src/common/exceptions/business.exception';
 
 @Injectable()
 export class OverstaysService {
@@ -15,46 +16,34 @@ export class OverstaysService {
 
    async create(createOverstayDto: CreateOverstayDto) {
     const overstay = this.overstayRepo.create(createOverstayDto);
-    await this.overstayRepo.save(overstay);
-
-    return {
-      message: RESPONSE_MESSAGE.OVERSTAY.CREATED,
-      data: overstay,
-    };
+    return await this.overstayRepo.save(overstay);
   }
 
-  async findAll() {
-    const overstays = await this.overstayRepo.find();
-    return {
-      message: RESPONSE_MESSAGE.OVERSTAY.FETCHED,
-      data: overstays,
-    };
+  async findAll(page: number, limit: number, search?: string): Promise<[Overstay[], number]> {
+     const queryBuilder = this.overstayRepo.createQueryBuilder('overstay');
+    if (search) {
+      queryBuilder.where('overstay.description LIKE :search', { search: `%${search}%` });
+    }
+    const overstays = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+    const total = await queryBuilder.getCount();
+    return [overstays, total];
   }
 
   async findOne(id: string) {
     const overstay = await this.overstayRepo.findOneBy({ id });
     if (!overstay) {
-      throw new Error(RESPONSE_MESSAGE.OVERSTAY.NOT_FOUND);
+      throw new BusinessException(RESPONSE_MESSAGE.OVERSTAY.NOT_FOUND);
     }
-    return {
-      message: RESPONSE_MESSAGE.OVERSTAY.FETCHED,
-      data: overstay,
-    };
+    return overstay;
   }
 
   async update(id: string, updateOverstayDto: UpdateOverstayDto) {
-    const overstay = await this.overstayRepo.preload({
-      id,
-      ...updateOverstayDto,
-    });
-    if (!overstay) {
-      throw new Error(RESPONSE_MESSAGE.OVERSTAY.NOT_FOUND);
-    }
-    await this.overstayRepo.save(overstay);
-    return {
-      message: RESPONSE_MESSAGE.OVERSTAY.UPDATED,
-      data: overstay,
-    };
+    const overstay = await this.findOne(id);
+    await this.overstayRepo.update(id, updateOverstayDto);
+    return overstay;
   }
   
 }

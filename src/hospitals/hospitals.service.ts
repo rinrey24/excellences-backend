@@ -14,76 +14,37 @@ export class HospitalsService {
   ) {}
 
   async create(createHospitalDto: CreateHospitalDto) {
-    try{
       const hospital = this.hospitalRepo.create(createHospitalDto);
-
-      const getHospitalFromDB = await this.hospitalRepo.findOne({
-        where: { kode_rs: hospital.kode_rs },
-      });
-
-      if (getHospitalFromDB){
-          throw new BusinessException(RESPONSE_MESSAGE.HOSPITAL.EXIST);
-      }
-
+      await this.findOne(hospital.kode_rs);
       await this.hospitalRepo.save(hospital);
-  
-      return {
-        message: RESPONSE_MESSAGE.HOSPITAL.CREATED,
-        data: hospital,
-      };
-    }catch (err){
-      console.error(err)
-      throw err
+      return hospital;
+  }
+
+  async findAll(page: number, limit: number, search?: string): Promise<[Hospital[], number]> {
+    const queryBuilder = this.hospitalRepo.createQueryBuilder('hospital');
+    if (search) {
+      queryBuilder.where('hospital.nama LIKE :search', { search: `%${search}%` });
     }
-    
+    const hospitals = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+    const total = await queryBuilder.getCount();
+    return [hospitals, total];
   }
 
-  async findAll() {
-    const hospitals = await this.hospitalRepo.find();
-    return {
-      message: RESPONSE_MESSAGE.HOSPITAL.FETCHED,
-      data: hospitals,
-    };
-  }
-
-  /** 🔹 INTERNAL – RETURN ENTITY ONLY */
-  async findOneEntity(kode_rs: string): Promise<Hospital> {
-    const hospital = await this.hospitalRepo.findOne({
-      where: { kode_rs: kode_rs },
-    });
-
+  async findOne(kode_rs: string) {
+    const hospital = await this.hospitalRepo.findOneBy({ kode_rs });
     if (!hospital) {
       throw new BusinessException(RESPONSE_MESSAGE.HOSPITAL.NOT_FOUND);
     }
-
     return hospital;
   }
 
-  /** 🔹 API RESPONSE */
-  async findOne(kode_rs: string) {
-    const hospital = await this.findOneEntity(kode_rs);
-
-    return {
-      message: RESPONSE_MESSAGE.HOSPITAL.FETCHED,
-      data: hospital,
-    };
-  }
-
   async update(kode_rs: string, dto: UpdateHospitalDto) {
-    try{
-    const hospital = await this.findOneEntity(kode_rs);
-
-    Object.assign(hospital, dto);
-    await this.hospitalRepo.save(hospital);
-
-    return {
-      message: RESPONSE_MESSAGE.HOSPITAL.UPDATED,
-      data: hospital,
-    };
-    } catch (err){
-      console.error(err)
-      throw err
-    }
+    const hospital = await this.findOne(kode_rs);
+    await this.hospitalRepo.update(kode_rs, dto);
+    return hospital;
   }
   
 }

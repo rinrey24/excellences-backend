@@ -12,6 +12,8 @@ import { RulesModule } from './rules/rules.module';
 import { OverstaysModule } from './overstays/overstays.module';
 import { WinstonModule } from 'nest-winston';
 import { winstonLoggerOptions } from './common/logger/winston.config';
+import { DiagnosesModule } from './diagnoses/diagnoses.module';
+import { ProceduresModule } from './procedures/procedures.module';
 
 @Module({
   imports: [
@@ -53,6 +55,10 @@ import { winstonLoggerOptions } from './common/logger/winston.config';
     RulesModule,
 
     OverstaysModule,
+
+    DiagnosesModule,
+
+    ProceduresModule,
   ],
   controllers: [AppController],
   providers: [AppService],

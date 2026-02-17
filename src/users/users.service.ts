@@ -24,14 +24,18 @@ export class UsersService {
         return this.userRepo.save(user);
     }
 
-    async findAll(){
-        const user = await this.userRepo.find({
-            select: ['id','username','name','role','created_at']
-        });
-        return {
-            message: RESPONSE_MESSAGE.USER.FETCHED,
-            data: user,
-        };
+    async findAll(pageNum: number, limitNum: number, search?: string): Promise<[User[], number]> {
+        const queryBuilder = this.userRepo.createQueryBuilder('user');
+        if (search) {
+            queryBuilder.where('user.username LIKE :search OR user.name LIKE :search', { search: `%${search}%` });
+        }
+        const users = await queryBuilder
+            .select(['user.id', 'user.username', 'user.name', 'user.role', 'user.created_at'])
+            .skip((pageNum - 1) * limitNum)
+            .take(limitNum)
+            .getMany();
+        const total = await queryBuilder.getCount();
+        return [users, total];
     }
 
     async findOne(id: string){
@@ -48,8 +52,8 @@ export class UsersService {
 
     async update(id: string,dto: UpdateUserDto){
         const user = await this.findOne(id);
-        Object.assign(user,dto);
-        return this.userRepo.save(user);
+        await this.userRepo.update(id, dto);
+        return user;
     }
     
 
