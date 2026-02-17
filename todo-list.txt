@@ -1,9 +1,8 @@
 [x] 1. rapihkan response di claim
 [x] 2. seragamkan semua id menjadi uuid (pengecualian untuk tabel user, dan claim)
 [x] 3. buat tabel transaksinya (satu tabel results jadi satu atau setiap modul satu?)
-[ ] 4. terapkan rules engine
-[x] 5. buat master diagnosa dan procedure
-[~] 6. rapikan struktur code, controller handle request dan response, dan service handle hanya logic
+[x] 4. buat master diagnosa dan procedure
+[~] 5. rapikan struktur code, controller handle request dan response, dan service handle hanya logic
         [x] diagnoses
         [x] procedure 
         [x] hospitals 
@@ -11,7 +10,9 @@
         [x] users 
         [x] claims 
         [ ] rules 
-
+[ ] 6. terapkan rules engine= tabel nya adalah rules, rules_conditions, rules_actions
+[ ] 7. buat tabel regulation_versions untuk relasi ke rules nanti
+[ ] 8. atau rules dalam bentuk dsl?
 
 fokus V2
 
