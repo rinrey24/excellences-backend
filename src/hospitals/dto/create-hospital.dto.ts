@@ -2,13 +2,13 @@ import { IsNotEmpty, IsOptional } from "class-validator";
 
 export class CreateHospitalDto {
     @IsNotEmpty()
-    kode_rs!: string;
+    code!: string;
 
     @IsNotEmpty()
     name!: string;
 
     @IsNotEmpty()
-    kelas_rs!: string;
+    class!: string;
 
     @IsNotEmpty()
     address!: string;

@@ -1,15 +1,18 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import {  Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity } from "src/common/base/base.entity";
+import { Rule } from "src/rules/entities/rule.entity";
+import { Claim } from "src/claims/entities/claim.entity";
 
 @Entity('hospitals')
-export class Hospital {
-    @PrimaryColumn()
-    kode_rs!: string;
+export class Hospital extends BaseEntity {
+    @Column({ unique: true })
+    code!: string;
 
     @Column()
     name!: string;
 
     @Column()
-    kelas_rs!: string;
+    class!: string;
 
     @Column()
     address!: string;
@@ -17,6 +20,9 @@ export class Hospital {
     @Column({ nullable: true})
     phone!: string;
 
-    @CreateDateColumn()
-    created_at!: Date;
+    @OneToMany(() => Claim, (claim) => claim.kode_rs)
+    claims!: Claim[];
+
+    @OneToMany(() => Rule, (rule) => rule.hospital)
+    rules!: Rule[];
 }

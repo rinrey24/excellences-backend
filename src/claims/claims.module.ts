@@ -9,14 +9,17 @@ import { ClaimsImportProcessor } from './claims-import.processor';
 import { DiagnoseTransaction } from './entities/diagnose-transaction.entity';
 import { ProceduresTransaction } from './entities/procedures-transaction.entity';
 import { ClaimResult } from './entities/claim.results.entity';
+import { ClaimRuleResult } from './entities/claim-rule-result.entity';
 import { Overstay } from 'src/overstays/entities/overstay.entity';
+import { RuleEngineModule } from 'src/rule-engine/rule-engine.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Claim, ImportJob,DiagnoseTransaction,ProceduresTransaction,ClaimResult,Overstay]),
+    TypeOrmModule.forFeature([Claim, ImportJob,DiagnoseTransaction,ProceduresTransaction,ClaimResult,Overstay,ClaimRuleResult]),
     BullModule.registerQueue({
       name: 'claims-import',
     }),
+    RuleEngineModule
   ],
   controllers: [ClaimsController],
   providers: [ClaimsService, ClaimsImportProcessor],

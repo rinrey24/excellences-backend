@@ -15,7 +15,7 @@ export class HospitalsService {
 
   async create(createHospitalDto: CreateHospitalDto) {
       const hospital = this.hospitalRepo.create(createHospitalDto);
-      await this.findOne(hospital.kode_rs);
+      await this.findOne(hospital.code);
       await this.hospitalRepo.save(hospital);
       return hospital;
   }
@@ -23,7 +23,7 @@ export class HospitalsService {
   async findAll(page: number, limit: number, search?: string): Promise<[Hospital[], number]> {
     const queryBuilder = this.hospitalRepo.createQueryBuilder('hospital');
     if (search) {
-      queryBuilder.where('hospital.nama LIKE :search', { search: `%${search}%` });
+      queryBuilder.where('hospital.name LIKE :search', { search: `%${search}%` });
     }
     const hospitals = await queryBuilder
       .skip((page - 1) * limit)
@@ -33,17 +33,17 @@ export class HospitalsService {
     return [hospitals, total];
   }
 
-  async findOne(kode_rs: string) {
-    const hospital = await this.hospitalRepo.findOneBy({ kode_rs });
+  async findOne(code: string) {
+    const hospital = await this.hospitalRepo.findOneBy({ code });
     if (!hospital) {
       throw new BusinessException(RESPONSE_MESSAGE.HOSPITAL.NOT_FOUND);
     }
     return hospital;
   }
 
-  async update(kode_rs: string, dto: UpdateHospitalDto) {
-    const hospital = await this.findOne(kode_rs);
-    await this.hospitalRepo.update(kode_rs, dto);
+  async update(code: string, dto: UpdateHospitalDto) {
+    const hospital = await this.findOne(code);
+    await this.hospitalRepo.update(code, dto);
     return hospital;
   }
   

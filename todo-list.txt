@@ -2,17 +2,22 @@
 [x] 2. seragamkan semua id menjadi uuid (pengecualian untuk tabel user, dan claim)
 [x] 3. buat tabel transaksinya (satu tabel results jadi satu atau setiap modul satu?)
 [x] 4. buat master diagnosa dan procedure
-[~] 5. rapikan struktur code, controller handle request dan response, dan service handle hanya logic
+[x] 5. rapikan struktur code, controller handle request dan response, dan service handle hanya logic
         [x] diagnoses
         [x] procedure 
         [x] hospitals 
         [x] overstays 
         [x] users 
         [x] claims 
-        [ ] rules 
-[ ] 6. terapkan rules engine= tabel nya adalah rules, rules_conditions, rules_actions
-[ ] 7. buat tabel regulation_versions untuk relasi ke rules nanti
-[ ] 8. atau rules dalam bentuk dsl?
+        [x] rules
+[x] 6. buatkan master rules engine= tabel nya adalah rules, rules_condition_groups, rules_conditions, rules_actions
+[x] 7. terapkan master rules engine dan implementasinya ke transaksi
+[~] 8. buat tabel regulation_versions untuk relasi ke rules nanti
+[x] 9. atau rules dalam bentuk dsl? jawabnya kita coba rules
+[ ] 10. buat rules pembanding antar field (kata kunci: support expression)
+[x] 11. rapihkan dan validasi jika diagnosa/prosedur yang dipisahkan dengan titik koma (;)
+[ ] 12. buat alternatif rule dengan tabel base, jadi peraturannya ada di setiap master tabel nanti
+[ ] 13. buat logic permanen yang sudah hampir pasti ada di regulasi. contohnya rajal vs ranap
 
 fokus V2
 

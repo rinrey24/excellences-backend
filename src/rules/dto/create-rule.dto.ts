@@ -1,26 +1,42 @@
-import {  IsNotEmpty, IsNumber, IsOptional } from "class-validator";
+import {
+  IsString,
+  IsEnum,
+  IsNumber,
+  ValidateNested,
+  IsArray,
+  IsOptional,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { RuleStatus } from 'src/common/enums/rule-status.enum';
+import { ConditionTreeDto } from './condition-tree.dto';
+import { ActionDto } from './action.dto';
 
 export class CreateRuleDto {
-    @IsNotEmpty()
-    name!: string;
 
-    @IsOptional()
-    description?: string;
+  @IsString()
+  name!: string;
 
-    @IsNotEmpty()
-    category!: string;
+  @IsString()
+  category!: string;
 
-    @IsNotEmpty()
-    severity_level!: string;
+  @IsEnum(['LOW', 'MEDIUM', 'HIGH'])
+  severity_level!: 'LOW' | 'MEDIUM' | 'HIGH';
 
-    @IsNotEmpty()
-    @IsNumber()
-    score!: number;
+  @IsNumber()
+  base_score!: number;
 
-    @IsNotEmpty()
-    expression!: any;
+  @IsOptional()
+  effective_start_date?: Date;
+  
+  @IsOptional()
+  description?: string;
 
-    @IsNotEmpty()
-    is_active!: boolean;
-    
+  @ValidateNested()
+  @Type(() => ConditionTreeDto)
+  condition_tree!: ConditionTreeDto;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ActionDto)
+  actions!: ActionDto[];
 }

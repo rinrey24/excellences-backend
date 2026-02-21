@@ -1,10 +1,8 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity } from "src/common/base/base.entity";
 
 @Entity('diagnose_transactions')
-export class DiagnoseTransaction {
-    @PrimaryGeneratedColumn("uuid")
-    id! : string
-    
+export class DiagnoseTransaction extends BaseEntity {
     @Column()
     import_job_id! : string
 
@@ -13,8 +11,4 @@ export class DiagnoseTransaction {
 
     @Column()
     diagnose_code! : string
-
-    @CreateDateColumn()
-    created_at! : Date
-
 }

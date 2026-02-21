@@ -1,9 +1,8 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {  Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity } from "src/common/base/base.entity";
 
 @Entity('import_jobs')
-export class ImportJob {
-    @PrimaryGeneratedColumn("uuid")
-    id! : string
+export class ImportJob extends BaseEntity {
 
     @Column()
     filename! : string
@@ -25,7 +24,4 @@ export class ImportJob {
 
     @Column({ type: 'timestamp', nullable: true })
     completed_at!: Date | null;
-
-    @CreateDateColumn()
-    created_at! : Date
 }

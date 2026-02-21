@@ -1,41 +1,71 @@
+// modules/rules/entities/rule.entity.ts
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+  Index,
 } from 'typeorm';
+import { BaseEntity } from 'src/common/base/base.entity';
+import { Hospital } from 'src/hospitals/entities/hospital.entity';
+import { RuleStatus } from 'src/common/enums/rule-status.enum';
+import { RuleCondition } from './rule-condition.entity';
+import { RuleAction } from './rule-action.entity';
+import { RuleConditionGroup } from './rule-condition-group.entity';
 
-@Entity({ name: 'rules' })
-export class Rule {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+@Entity('rules')
+@Index(['status', 'effective_start_date'])
+export class Rule extends BaseEntity {
 
-  @Column({ type: 'varchar', length: 200 })
+  @Column({ length: 200 })
   name!: string;
 
   @Column({ type: 'text', nullable: true })
   description?: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  category?: string;
+  @Column({ length: 100 })
+  category!: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  severity_level?: string;
+  @Column({ length: 20 })
+  severity_level!: 'LOW' | 'MEDIUM' | 'HIGH';
 
-  @Column({ type: 'int', default: 0 })
-  score!: number;
+  @Column({ default: 0 })
+  base_score!: number;
 
-  // JSONB untuk menyimpan expression (misal json-logic)
-  @Column({ type: 'jsonb', nullable: true })
-  expression?: Record<string, any>;
+  @Column({
+    type: 'enum',
+    enum: RuleStatus,
+    default: RuleStatus.DRAFT,
+  })
+  status!: RuleStatus;
 
-  @Column({ type: 'boolean', default: true })
-  is_active!: boolean;
+  @Column({ default: 1 })
+  version!: number;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  created_at!: Date;
+  @Column({ type: 'date', nullable: true })
+  effective_start_date?: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
-  updated_at?: Date;
+  @Column({ type: 'date', nullable: true })
+  effective_end_date?: Date;
+
+  // ===== RELATION =====
+
+  @OneToMany(
+    () => RuleConditionGroup,
+    group => group.rule,
+    { cascade: true }
+  )
+  condition_groups!: RuleConditionGroup[];
+
+  @OneToMany(
+    () => RuleAction,
+    action => action.rule,
+    { cascade: true }
+  )
+  actions!: RuleAction[];
+
+  @ManyToOne(() => Hospital, (hospital) => hospital.rules, {
+    nullable: true,
+  })
+  hospital?: Hospital;
 }

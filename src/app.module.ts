@@ -14,6 +14,7 @@ import { WinstonModule } from 'nest-winston';
 import { winstonLoggerOptions } from './common/logger/winston.config';
 import { DiagnosesModule } from './diagnoses/diagnoses.module';
 import { ProceduresModule } from './procedures/procedures.module';
+import { RuleEngineModule } from './rule-engine/rule-engine.module';
 
 @Module({
   imports: [
@@ -59,6 +60,8 @@ import { ProceduresModule } from './procedures/procedures.module';
     DiagnosesModule,
 
     ProceduresModule,
+
+    RuleEngineModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,9 +1,8 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity } from "src/common/base/base.entity";
 
 @Entity('procedure_transactions')
-export class ProceduresTransaction {
-    @PrimaryGeneratedColumn("uuid")
-    id! : string
+export class ProceduresTransaction extends BaseEntity {
     
     @Column()
     import_job_id! : string
@@ -13,8 +12,5 @@ export class ProceduresTransaction {
 
     @Column()
     procedure_code! : string
-
-    @CreateDateColumn()
-    created_at! : Date
 
 }

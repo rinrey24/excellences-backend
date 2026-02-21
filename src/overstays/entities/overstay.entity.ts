@@ -1,9 +1,8 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {  Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity } from "src/common/base/base.entity";
 
 @Entity({ name: 'overstays' })
-export class Overstay {
-    @PrimaryGeneratedColumn('uuid')
-    id!: string;
+export class Overstay extends BaseEntity {
 
     @Column({ type: 'varchar', length: 500 , nullable: false })
     category!: string;
@@ -22,7 +21,4 @@ export class Overstay {
 
     @Column({ type: 'boolean', default: true })
     is_active!: boolean;
-
-    @CreateDateColumn({ type: 'timestamp' })
-    created_at!: Date;
 }

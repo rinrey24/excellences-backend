@@ -4,13 +4,13 @@ import { IsOptional } from 'class-validator';
 
 export class UpdateHospitalDto extends PartialType(CreateHospitalDto) {
     @IsOptional()
-    kode_rs?: string;
+    code?: string;
 
     @IsOptional()
     name?: string;
 
     @IsOptional()
-    kelas_rs?: string;
+    class?: string;
 
     @IsOptional()
     address?: string;

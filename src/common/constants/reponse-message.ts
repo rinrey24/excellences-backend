@@ -32,12 +32,14 @@ export const RESPONSE_MESSAGE = {
   },
   
   RULE: {
-    FETCHED: 'Hospital fetched successfully',
-    CREATED: 'Hospital created successfully',
-    UPDATED: 'Hospital updated successfully',
-    DELETED: 'Hospital deleted successfully',
-    EXIST: 'Hospital already exist',
-    NOT_FOUND: 'Hospital not found',
+    FETCHED: 'Rule fetched successfully',
+    CREATED: 'Rule created successfully',
+    UPDATED: 'Rule updated successfully',
+    DELETED: 'Rule deleted successfully',
+    ACTIVATED: 'Rule activated successfully',
+    ARCHIVED: 'Rule archived successfully',
+    EXIST: 'Rule already exist',
+    NOT_FOUND: 'Rule not found',
   },
 
   JOB: {

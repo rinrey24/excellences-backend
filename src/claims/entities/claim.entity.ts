@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ClaimRuleResult } from "./claim-rule-result.entity";
 
 @Entity('claims')
 export class Claim {
@@ -259,4 +260,7 @@ export class Claim {
 
   @CreateDateColumn({ type: 'timestamp' })
   created_at! : Date;
+  
+  @OneToMany(() => ClaimRuleResult, (res) => res.claim)
+  rule_results!: ClaimRuleResult[];
 }

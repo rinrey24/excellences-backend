@@ -9,6 +9,7 @@ import { Readable } from 'stream';
 import { RESPONSE_MESSAGE } from 'src/common/constants/reponse-message';
 import { DiagnoseTransaction } from './entities/diagnose-transaction.entity';
 import { ProceduresTransaction } from './entities/procedures-transaction.entity';
+import { RuleEngineService } from 'src/rule-engine/rule-engine.service';
 
 @Processor('claims-import')
 export class ClaimsImportProcessor {
@@ -21,6 +22,7 @@ export class ClaimsImportProcessor {
     private readonly diagTrsRepo: Repository<DiagnoseTransaction>,
     @InjectRepository(ProceduresTransaction)
     private readonly procTrsRepo: Repository<ProceduresTransaction>,
+    private readonly ruleEngineService: RuleEngineService,
   ) {}
 
   @Process()
@@ -368,9 +370,18 @@ export class ClaimsImportProcessor {
         await this.procTrsRepo.insert(procRows);
       }
 
-      //insert claim results
-      // const insertedLos = result.raw as Array<{ id: number;los: number | null}>;
-      // const resultRows: Array<{claim_id: number; los: number}> = [];
+    // =============================
+    // 🔥 RUN RULE ENGINE HERE
+    // =============================
+    const fullClaims = await this.claimsRepo.find({
+  where: { import_job_id: records[0].import_job_id },
+});
+
+    await this.ruleEngineService.evaluateBatch(
+      fullClaims,
+      records[0].import_job_id,
+    );
+      
 
       console.log(`✓ Inserted ${records.length} records`);
     } catch (error) {

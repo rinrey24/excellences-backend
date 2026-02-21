@@ -6,9 +6,9 @@ export async function seedHospitals(dataSource: DataSource) {
 
   const data = [
     {
-      kode_rs: '3173712',
+      code: '3173712',
       name: 'RSU Yarsi Jakarta',
-      kelas_rs: 'B',
+      class: 'B',
       address: 'Jl. Letjen Suprapto No. 16, Cempaka Putih, Jakarta Pusat',
       phone: '021-4206674',
     },
