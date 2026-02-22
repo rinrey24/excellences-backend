@@ -158,6 +158,9 @@ export class ClaimsImportProcessor {
             const drug_chronic_amt = Number(billingGroup.drug_chronic_amt || 0);
             const drug_chemo_amt = Number(billingGroup.drug_chemo_amt || 0);
 
+            // const description = row.INACBG.at(0) + ' - ' + row.INACBG + ' - ' + row.INACBG.at(-1) + ' - ' + row.TOTAL_TARIF;
+            // const visit_count = row.NAMA_PASIEN + ' - ' + row.MRN + ' - ' + row.INACBG.at(-1);
+
 
             const record = {
               import_job_id: importJobId,
@@ -243,6 +246,8 @@ export class ClaimsImportProcessor {
               kategori: row.INACBG.at(-1) === '0' ? 'Rawat Jalan' : 'Rawat Inap',
               cmg: row.INACBG.at(0) || null,
               tipe_kasus: row.INACBG.split('-')[1] || null,
+              // description: description,
+              // visit_count: visit_count,
               raw_json: row,
             };
 
@@ -373,14 +378,14 @@ export class ClaimsImportProcessor {
     // =============================
     // 🔥 RUN RULE ENGINE HERE
     // =============================
-    const fullClaims = await this.claimsRepo.find({
-  where: { import_job_id: records[0].import_job_id },
-});
+    //     const fullClaims = await this.claimsRepo.find({
+    //   where: { import_job_id: records[0].import_job_id },
+    // });
 
-    await this.ruleEngineService.evaluateBatch(
-      fullClaims,
-      records[0].import_job_id,
-    );
+    //     await this.ruleEngineService.evaluateBatch(
+    //       fullClaims,
+    //       records[0].import_job_id,
+    //     );
       
 
       console.log(`✓ Inserted ${records.length} records`);

@@ -17,7 +17,16 @@
 [ ] 10. buat rules pembanding antar field (kata kunci: support expression)
 [x] 11. rapihkan dan validasi jika diagnosa/prosedur yang dipisahkan dengan titik koma (;)
 [ ] 12. buat alternatif rule dengan tabel base, jadi peraturannya ada di setiap master tabel nanti
-[ ] 13. buat logic permanen yang sudah hampir pasti ada di regulasi. contohnya rajal vs ranap
+[ ] 13. buat logic permanen yang sudah hampir pasti ada di regulasi. 
+    [x] a. PASIEN RAJAL DAN RANAP DI HARI YANG SAMA
+    [ ] b. PASIEN RAJAL, DATANG LEBIH DARI 1 KALI DALAM 1 HARI
+    [ ] c. PASIEN RANAP, DATANG LEBIH DARI 1 KALI DALAM 1 (SATU) BULAN
+    [ ] d. PASIEN RAJAL, DATANG LEBIH DARI 4 KALI DALAM 1 (SATU) BULAN
+
+[ ] 14. buat analyze pisah berdiri sendiri
+
+tahap 2:
+[ ] 1. buat dashboard
 
 fokus V2
 
@@ -26,7 +35,7 @@ general:
 [x] 1. ambil kategori (rawat jalan / rawat inap) = =IF([@[Severity Level]]="";"";IF([@[Severity Level]]="0";"RAWAT JALAN";"RAWAT INAP")) 
 [x] 2. tipe kasus = ambil nilai kedua dari code inacbg (ex. N-3-15-0 maka tipe kasusnya adalah 3) (dari hardcode aja nanti)
 [x] 3. severity level = ambil nilai terakhir dari code inacbg (ex. N-3-15-0 maka severity levelnya adalah 0)
-[ ] 4. Des. (description?) = Case-MIX Main Group - Code Inabg - Severity Level - Total Tarif (ex. N - N-3-15-0 - 0 - 941600) (dari hardcode aja nanti)
+[~] 4. Des. (description?) = Case-MIX Main Group - Code Inabg - Severity Level - Total Tarif (ex. N - N-3-15-0 - 0 - 941600) (dari hardcode aja nanti)
 [x] 5. Case-MIX Main Group = ambil nilai pertama dari code inacbg (ex. N-3-15-0 maka CMG nya adalah N) (dari hardcode aja nanti)
 
 v2:

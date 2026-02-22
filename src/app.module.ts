@@ -15,6 +15,7 @@ import { winstonLoggerOptions } from './common/logger/winston.config';
 import { DiagnosesModule } from './diagnoses/diagnoses.module';
 import { ProceduresModule } from './procedures/procedures.module';
 import { RuleEngineModule } from './rule-engine/rule-engine.module';
+import { AnalyzeModule } from './analyze/analyze.module';
 
 @Module({
   imports: [
@@ -62,6 +63,8 @@ import { RuleEngineModule } from './rule-engine/rule-engine.module';
     ProceduresModule,
 
     RuleEngineModule,
+
+    AnalyzeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -41,8 +41,11 @@ export class RuleEngineService {
             rule: rule.id as any,
             triggered: true,
             score_generated: rule.base_score,
-            message_generated: rule.name,
+            message_generated: rule.actions.map(a => a.message_template).join('; '),
             evaluated_at: new Date(),
+            category: rule.category,
+            severity: rule.severity_level,
+            source: 'rule-engine',
             // matched: true,
           });
         }

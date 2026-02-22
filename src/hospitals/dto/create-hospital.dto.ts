@@ -15,4 +15,10 @@ export class CreateHospitalDto {
     
     @IsOptional()
     phone!: string;
+    
+    @IsNotEmpty()
+    max_visit_rj_permonth!: number;
+
+    @IsNotEmpty()
+    max_visit_ri_permonth!: number;
 }

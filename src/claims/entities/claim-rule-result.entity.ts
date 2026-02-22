@@ -27,4 +27,14 @@ export class ClaimRuleResult extends BaseEntity {
 
   @Column({ type: 'timestamp' })
   evaluated_at!: Date;
+  
+  @Column()
+  category!: string;
+  
+  @Column()
+  severity!: string;
+  
+  @Column()
+  source!: string;
+  
 }
