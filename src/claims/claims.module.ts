@@ -22,5 +22,6 @@ import { RuleEngineModule } from 'src/rule-engine/rule-engine.module';
   ],
   controllers: [ClaimsController],
   providers: [ClaimsService, ClaimsImportProcessor],
+  exports: [ClaimsService],
 })
 export class ClaimsModule {}

@@ -17,13 +17,13 @@
 [ ] 10. buat rules pembanding antar field (kata kunci: support expression)
 [x] 11. rapihkan dan validasi jika diagnosa/prosedur yang dipisahkan dengan titik koma (;)
 [ ] 12. buat alternatif rule dengan tabel base, jadi peraturannya ada di setiap master tabel nanti
-[ ] 13. buat logic permanen yang sudah hampir pasti ada di regulasi. 
+[x] 13. buat logic / query permanen yang sudah hampir pasti ada di regulasi. 
     [x] a. PASIEN RAJAL DAN RANAP DI HARI YANG SAMA
-    [ ] b. PASIEN RAJAL, DATANG LEBIH DARI 1 KALI DALAM 1 HARI
-    [ ] c. PASIEN RANAP, DATANG LEBIH DARI 1 KALI DALAM 1 (SATU) BULAN
-    [ ] d. PASIEN RAJAL, DATANG LEBIH DARI 4 KALI DALAM 1 (SATU) BULAN
+    [x] b. PASIEN RAJAL, DATANG LEBIH DARI 1 KALI DALAM 1 HARI
+    [x] c. PASIEN RANAP, DATANG LEBIH DARI 1 KALI DALAM 1 (SATU) BULAN
+    [x] d. PASIEN RAJAL, DATANG LEBIH DARI 4 KALI DALAM 1 (SATU) BULAN? / MINGGU?
 
-[ ] 14. buat analyze pisah berdiri sendiri
+[x] 14. buat analyze pisah berdiri sendiri
 
 tahap 2:
 [ ] 1. buat dashboard

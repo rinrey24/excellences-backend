@@ -151,35 +151,25 @@ export class ClaimsService {
     return [data, total];
   }
 
-  async analyzeClaim(import_job_id: string) {
+  async deleteClaimResultByJobId(import_job_id: string) {
     const [dataClaim, _] = await this.getClaimByJobId(import_job_id, 1, 1);
 
     if (dataClaim.length === 0) {
       throw new BusinessException(RESPONSE_MESSAGE.CLAIM.NOT_FOUND);
     }
 
-    //delete if exist
     await this.claimRuleResultsRepo.delete({
-      import_job_id: import_job_id,
+      import_job_id,
     });
 
-    // //data pasien yang melebihi batas los terlalu lama
-    // const dataOverstay = await this.overstayedAnalysis(import_job_id);
-    // await this.claimResultsRepo.insert(dataOverstay);
+    return dataClaim;
+  }
 
-    //data pasien masuk di hari yang sama
-    const dataDuplicateSameDay = await this.rajalVsRanapAnalysis(import_job_id);
-    await this.claimRuleResultsRepo.insert(dataDuplicateSameDay);
-
-    //data pasien rawat jalan lebih dari 1 kali dalam 1 hari
-    const dataVisitRajalLebihDari1KaliDlm1Hari = await this.visitRajalLebihDari1KaliDlm1Hari(import_job_id);
-    await this.claimRuleResultsRepo.insert(dataVisitRajalLebihDari1KaliDlm1Hari);
-
-    //rule engine
-    const fullClaims = await this.claimRepo.find({where: { import_job_id: import_job_id },});
-    await this.ruleEngineService.evaluateBatch(fullClaims,import_job_id,);
-
-    return import_job_id;
+  async createRuleResult(dto: Array<
+      DeepPartial<ClaimRuleResult>
+    > = []) {
+    const claimRuleResult = this.claimRuleResultsRepo.create(dto);
+    return this.claimRuleResultsRepo.insert(claimRuleResult);
   }
 
   //excellences v2
@@ -205,19 +195,19 @@ export class ClaimsService {
     AND c.nama_pasien     = dup.nama_pasien
     AND c.mrn             = dup.mrn
     WHERE c.import_job_id = $1
-    ORDER BY c.admission_date ASC;
+    ORDER BY c.admission_date,c.mrn ASC;
       `,
       [import_job_id],
     )) as Array<{ id: number; import_job_id: string }>;
 
     const groupName = 'Kunjungan rawat jalan dan rawat inap dihari yang sama';
 
-    const duplicateSameDayRows: Array<
+    const resultRow: Array<
       DeepPartial<ClaimRuleResult>
     > = [];
 
     for (const row of dataRajalVsRanapAnalysis) {
-      duplicateSameDayRows.push({
+      resultRow.push({
         import_job_id: row.import_job_id,
         claim: row.id as any,
         rule: null as any,
@@ -231,7 +221,7 @@ export class ClaimsService {
       });
     }
 
-    return duplicateSameDayRows;
+    return resultRow;
   }
 
     //excellences v2
@@ -263,12 +253,12 @@ ORDER BY c.admission_date ASC;
 
     const groupName = 'Pasien kunjungan rawat jalan lebih dari 1 kali dalam 1 hari';
 
-    const duplicateSameDayRows: Array<
+    const resultRow: Array<
       DeepPartial<ClaimRuleResult>
     > = [];
 
     for (const row of data) {
-      duplicateSameDayRows.push({
+      resultRow.push({
         import_job_id: row.import_job_id,
         claim: row.id as any,
         rule: null as any,
@@ -282,63 +272,7 @@ ORDER BY c.admission_date ASC;
       });
     }
 
-    return duplicateSameDayRows;
-  }
-
-  async getAnalyzedClaim(
-    import_job_id: string,
-    page: number = 1,
-    limit: number = 100,
-    group_results: string,
-  ): Promise<[ClaimRuleResult[], number]> {
-    const normalizedGroupResults =
-      group_results && group_results !== 'false' ? group_results : undefined;
-
-    const baseQuery = this.claimRuleResultsRepo
-      .createQueryBuilder('claim_rule_results')
-      .innerJoin(Claim, 'claims', 'claims.id = claim_rule_results.claimId')
-      .where('claim_rule_results.import_job_id = :import_job_id', { import_job_id });
-
-    if (normalizedGroupResults) {
-      baseQuery.andWhere('claim_rule_results.category = :group_results', {
-        group_results: normalizedGroupResults,
-      });
-    }
-
-    const [data, total] = await Promise.all([
-      baseQuery
-        .clone()
-        .select([
-          'claim_rule_results.import_job_id AS import_job_id',
-          'claims.id AS claim_id',
-          'claims.nama_pasien AS nama_pasien',
-          'claims.mrn AS mrn',
-          'claims.admission_date AS admission_date',
-          'claims.sep AS sep',
-          'claims.kategori AS kategori',
-          'claims.los AS los',
-          'claims.diaglist AS diaglist',
-          'claims.proclist AS proclist',
-          'claims.dpjp AS dpjp',
-          'claims.inacbg AS inacbg',
-          'claims.deskripsi_inacbg AS deskripsi_inacbg',
-          'claims.tarif_rs AS tarif_rs',
-          'claims.tarif_inacbg AS tarif_inacbg',
-          'claim_rule_results.category AS category',
-          'claim_rule_results.triggered AS triggered',
-          'claim_rule_results.score_generated AS score_generated',
-          'claim_rule_results.message_generated AS message_generated',
-          'claim_rule_results.severity AS severity',
-          'claim_rule_results.source AS source',
-        ])
-        .orderBy('claims.admission_date', 'ASC')
-        .offset((page - 1) * limit)
-        .limit(limit)
-        .getRawMany(),
-      baseQuery.clone().getCount(),
-    ]);
-
-    return [data, total];
+    return resultRow;
   }
 
   async deleteClaimByJobId(import_job_id: string) {
@@ -355,6 +289,37 @@ ORDER BY c.admission_date ASC;
     await this.proceduresTransactionRepo.delete({ import_job_id });
     return import_job_id;
   }
+
+  // async analyzeClaim(import_job_id: string) {
+  //   const [dataClaim, _] = await this.getClaimByJobId(import_job_id, 1, 1);
+
+  //   if (dataClaim.length === 0) {
+  //     throw new BusinessException(RESPONSE_MESSAGE.CLAIM.NOT_FOUND);
+  //   }
+
+  //   //delete if exist
+  //   await this.claimRuleResultsRepo.delete({
+  //     import_job_id: import_job_id,
+  //   });
+
+  //   // //data pasien yang melebihi batas los terlalu lama
+  //   // const dataOverstay = await this.overstayedAnalysis(import_job_id);
+  //   // await this.claimResultsRepo.insert(dataOverstay);
+
+  //   //data pasien masuk di hari yang sama
+  //   const dataDuplicateSameDay = await this.rajalVsRanapAnalysis(import_job_id);
+  //   await this.claimRuleResultsRepo.insert(dataDuplicateSameDay);
+
+  //   //data pasien rawat jalan lebih dari 1 kali dalam 1 hari
+  //   const dataVisitRajalLebihDari1KaliDlm1Hari = await this.visitRajalLebihDari1KaliDlm1Hari(import_job_id);
+  //   await this.claimRuleResultsRepo.insert(dataVisitRajalLebihDari1KaliDlm1Hari);
+
+  //   //rule engine
+  //   const fullClaims = await this.claimRepo.find({where: { import_job_id: import_job_id },});
+  //   await this.ruleEngineService.evaluateBatch(fullClaims,import_job_id,);
+
+  //   return import_job_id;
+  // }
 
   // //excellences v3
   // async overstayedAnalysis(import_job_id: string) {
@@ -410,5 +375,103 @@ ORDER BY c.admission_date ASC;
   //   }
   //   return overstayRows;
   // }
+
+  async visitRajalLebihDari4KaliDlm1Minggu(import_job_id: string) {
+    const data = (await this.claimRepo.query(
+      `
+SELECT *
+FROM (
+    SELECT
+        c.*,
+        COUNT(*) OVER (
+            PARTITION BY mrn
+            ORDER BY admission_date
+            RANGE BETWEEN INTERVAL '6 days' PRECEDING AND CURRENT ROW
+        ) AS visit_7days
+    FROM claims c
+    WHERE kategori = 'Rawat Jalan' and import_job_id=$1
+) sub
+WHERE visit_7days >= 4 and import_job_id=$1
+ORDER BY mrn, admission_date;
+      `,
+      [import_job_id],
+    )) as Array<{ id: number; import_job_id: string }>;
+
+    const groupName = 'Pasien kunjungan rawat jalan lebih dari 3 kali dalam 1 minggu';
+
+    const resultRow: Array<
+      DeepPartial<ClaimRuleResult>
+    > = [];
+
+    for (const row of data) {
+      resultRow.push({
+        import_job_id: row.import_job_id,
+        claim: row.id as any,
+        rule: null as any,
+        triggered: false,
+        score_generated: 60,
+        message_generated: groupName,
+        evaluated_at: new Date(),
+        category: 'READMISSION',
+        severity: 'HIGH',
+        source: 'plain-analysis',
+      });
+    }
+
+    return resultRow;
+  }
+
+  async visitRanapLebihDari1KaliDlm1Bulan(import_job_id: string) {
+    const data = (await this.claimRepo.query(
+      `
+SELECT c.*
+FROM claims c
+JOIN (
+    SELECT
+        mrn,
+        nama_pasien,
+        DATE_TRUNC('month', admission_date) AS visit_month
+    FROM claims
+    WHERE import_job_id = $1
+      AND kategori = 'Rawat Inap'
+    GROUP BY
+        mrn,
+        nama_pasien,
+        DATE_TRUNC('month', admission_date)
+    HAVING COUNT(*) > 1
+) dup
+ON  c.mrn = dup.mrn
+AND c.nama_pasien = dup.nama_pasien
+AND DATE_TRUNC('month', c.admission_date) = dup.visit_month
+WHERE c.import_job_id = $1
+  AND c.kategori = 'Rawat Inap'
+ORDER BY c.mrn, c.admission_date;
+      `,
+      [import_job_id],
+    )) as Array<{ id: number; import_job_id: string }>;
+
+    const groupName = 'Pasien kunjungan rawat inap lebih dari 1 kali dalam 1 bulan';
+
+    const resultRow: Array<
+      DeepPartial<ClaimRuleResult>
+    > = [];
+
+    for (const row of data) {
+      resultRow.push({
+        import_job_id: row.import_job_id,
+        claim: row.id as any,
+        rule: null as any,
+        triggered: false,
+        score_generated: 60,
+        message_generated: groupName,
+        evaluated_at: new Date(),
+        category: 'READMISSION',
+        severity: 'HIGH',
+        source: 'plain-analysis',
+      });
+    }
+
+    return resultRow;
+  }
 
 }

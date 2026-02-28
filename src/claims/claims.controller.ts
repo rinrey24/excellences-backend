@@ -120,34 +120,34 @@ export class ClaimsController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post('analyze')
-  async analyzeClaim(@Body('import_job_id') import_job_id: any) {
-    const result = await this.claimsService.analyzeClaim(import_job_id);
-    return {
-      message: RESPONSE_MESSAGE.CLAIM.ANALYZED,
-      data: result,
-    };
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Get('analyze/:import_job_id')
+  // async getAnalyzedClaim(
+  //   @Param('import_job_id') import_job_id: string,
+  //   @Query('page') page: string = '1',
+  //   @Query('limit') limit: string = '100',
+  //   @Query('group_results') group_results: string = 'false'
+  // ) {
+  //   const pageNum = Math.max(1, parseInt(page) || 1);
+  //   const limitNum = Math.min(1000, Math.max(1, parseInt(limit) || 100));
+  //   const [claims, total] = await this.claimsService.getAnalyzedClaim(import_job_id, pageNum, limitNum, group_results ); 
+  //   return formatPaginatedResponse(
+  //     RESPONSE_MESSAGE.CLAIM.FETCHED,
+  //     claims,
+  //     total,
+  //     pageNum,
+  //     limitNum,
+  //   );
+  // }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('analyze/:import_job_id')
-  async getAnalyzedClaim(
-    @Param('import_job_id') import_job_id: string,
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '100',
-    @Query('group_results') group_results: string = 'false'
-  ) {
-    const pageNum = Math.max(1, parseInt(page) || 1);
-    const limitNum = Math.min(1000, Math.max(1, parseInt(limit) || 100));
-    const [claims, total] = await this.claimsService.getAnalyzedClaim(import_job_id, pageNum, limitNum, group_results ); 
-    return formatPaginatedResponse(
-      RESPONSE_MESSAGE.CLAIM.FETCHED,
-      claims,
-      total,
-      pageNum,
-      limitNum,
-    );
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Post('analyze')
+  // async analyzeClaim(@Body('import_job_id') import_job_id: any) {
+  //   const result = await this.claimsService.analyzeClaim(import_job_id);
+  //   return {
+  //     message: RESPONSE_MESSAGE.CLAIM.ANALYZED,
+  //     data: result,
+  //   };
+  // }
 
 }
