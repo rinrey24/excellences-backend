@@ -242,7 +242,7 @@ export class ClaimsImportProcessor {
               sewa_alat: device_rent_amt,
               obat_kronis: drug_chronic_amt,
               obat_kemo: drug_chemo_amt,
-              severity_level: row.INACBG.at(-1) || null,
+              severity_level: row.INACBG.split('-').pop() || null,
               kategori: row.INACBG.at(-1) === '0' ? 'Rawat Jalan' : 'Rawat Inap',
               cmg: row.INACBG.at(0) || null,
               tipe_kasus: row.INACBG.split('-')[1] || null,

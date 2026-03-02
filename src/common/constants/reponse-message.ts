@@ -81,6 +81,33 @@ export const RESPONSE_MESSAGE = {
     NOT_FOUND: 'Procedure not found',
   },
 
+  CMG: {
+    FETCHED: 'CMG fetched successfully',
+    CREATED: 'CMG created successfully',
+    UPDATED: 'CMG updated successfully',
+    DELETED: 'CMG deleted successfully',
+    EXIST: 'CMG already exist',
+    NOT_FOUND: 'CMG not found',
+  },
+
+  CASE_TYPE: {
+    FETCHED: 'Case type fetched successfully',
+    CREATED: 'Case type created successfully',
+    UPDATED: 'Case type updated successfully',
+    DELETED: 'Case type deleted successfully',
+    EXIST: 'Case type already exist',
+    NOT_FOUND: 'Case type not found',
+  },
+
+  DASHBOARD: {
+    FETCHED: 'Dashboard fetched successfully',
+    CREATED: 'Dashboard created successfully',
+    UPDATED: 'Dashboard updated successfully',
+    DELETED: 'Dashboard deleted successfully',
+    EXIST: 'Dashboard already exist',
+    NOT_FOUND: 'Dashboard not found',
+  },
+
   VALIDATION: {
     FAILED: 'Validation failed',
     FILE_NOT_FOUND: 'File not found',

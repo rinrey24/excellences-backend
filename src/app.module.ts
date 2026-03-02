@@ -16,6 +16,9 @@ import { DiagnosesModule } from './diagnoses/diagnoses.module';
 import { ProceduresModule } from './procedures/procedures.module';
 import { RuleEngineModule } from './rule-engine/rule-engine.module';
 import { AnalyzeModule } from './analyze/analyze.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { CmgsModule } from './cmgs/cmgs.module';
+import { CaseTypesModule } from './case_types/case_types.module';
 
 @Module({
   imports: [
@@ -65,6 +68,12 @@ import { AnalyzeModule } from './analyze/analyze.module';
     RuleEngineModule,
 
     AnalyzeModule,
+
+    DashboardModule,
+
+    CmgsModule,
+
+    CaseTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

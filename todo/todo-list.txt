@@ -24,6 +24,11 @@
     [x] d. PASIEN RAJAL, DATANG LEBIH DARI 4 KALI DALAM 1 (SATU) BULAN? / MINGGU?
 
 [x] 14. buat analyze pisah berdiri sendiri
+[ ] 15. buatkan master sebagai berikut:
+    [x] a. master cmg (cmgs) beserta data seed awal
+    [x] b. master tipe kasus (case_types) beserta data seed awal
+    [ ] c. master severity (severity_levels)
+    [ ] d. master discharge (discharges)
 
 tahap 2:
 [ ] 1. buat dashboard
