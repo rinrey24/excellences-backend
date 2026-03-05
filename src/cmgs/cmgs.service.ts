@@ -15,6 +15,10 @@ export class CmgsService {
   ) {}
 
   async create(createCmgDto: CreateCmgDto) {
+    const getCodeCmg = await this.findOneByCodeCMG(createCmgDto.code_cmg);
+      if (getCodeCmg){
+        throw new BusinessException(RESPONSE_MESSAGE.CMG.EXIST);
+      }
     const cmg = this.cmgRepo.create(createCmgDto);
     return this.cmgRepo.save(cmg);
   }
@@ -51,6 +55,12 @@ export class CmgsService {
 
   async update(id: string, updateCmgDto: UpdateCmgDto) {
     const cmg = await this.findOne(id);
+    if (cmg.code_cmg != updateCmgDto.code_cmg){
+      const getCodeCmg = await this.findOneByCodeCMG(updateCmgDto.code_cmg as any);
+        if (getCodeCmg){
+          throw new BusinessException(RESPONSE_MESSAGE.CMG.EXIST);
+        }
+    }
     await this.cmgRepo.update(id, updateCmgDto);
     return cmg;
   }
@@ -58,6 +68,11 @@ export class CmgsService {
   async remove(id: string) {
     const cmg = await this.findOne(id);
     await this.cmgRepo.delete(id);
+    return cmg;
+  }
+
+    async findOneByCodeCMG(code_cmg: string) {
+    const cmg = await this.cmgRepo.findOne({where: {code_cmg:code_cmg}});
     return cmg;
   }
 }

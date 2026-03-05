@@ -19,6 +19,7 @@ import { AnalyzeModule } from './analyze/analyze.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { CmgsModule } from './cmgs/cmgs.module';
 import { CaseTypesModule } from './case_types/case_types.module';
+import { DischargesModule } from './discharges/discharges.module';
 
 @Module({
   imports: [
@@ -74,6 +75,8 @@ import { CaseTypesModule } from './case_types/case_types.module';
     CmgsModule,
 
     CaseTypesModule,
+
+    DischargesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

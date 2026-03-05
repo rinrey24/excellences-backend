@@ -61,6 +61,26 @@ export class DashboardController {
         data: data
     }
   }
+  
+  @UseGuards(JwtAuthGuard)
+  @Get('/case-type/:import_job_id')
+    async getRekapTipeKasus(@Param('import_job_id') import_job_id: string) {
+    const data = await this.dashboardService.getRekapTipeKasus(import_job_id)
+    return {
+        message: RESPONSE_MESSAGE.DASHBOARD.FETCHED,
+        data: data
+    }
+  }
+  
+  @UseGuards(JwtAuthGuard)
+  @Get('/cmg/:import_job_id')
+    async getRekapCMG(@Param('import_job_id') import_job_id: string) {
+    const data = await this.dashboardService.getRekapCMG(import_job_id)
+    return {
+        message: RESPONSE_MESSAGE.DASHBOARD.FETCHED,
+        data: data
+    }
+  }
 
 
 }

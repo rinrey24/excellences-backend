@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateProcedureDto } from './dto/create-procedure.dto';
 import { UpdateProcedureDto } from './dto/update-procedure.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,11 +9,17 @@ import { BusinessException } from 'src/common/exceptions/business.exception';
 
 @Injectable()
 export class ProceduresService {
+  private readonly logger = new Logger(ProceduresService.name);
   constructor(
     @InjectRepository(Procedure)
     private procedureRepo: Repository<Procedure>,
   ) {}
   async create(createProcedureDto: CreateProcedureDto) {
+    const getProc = await this.findOneByCode(createProcedureDto.code);
+    if (getProc){
+      this.logger.warn(`PROCEDURE already exist id=${getProc.code}`);
+      throw new BusinessException(RESPONSE_MESSAGE.PROCEDURE.EXIST);
+    }
     const procedure = this.procedureRepo.create(createProcedureDto);
     return await this.procedureRepo.save(procedure);
   }
@@ -43,6 +49,13 @@ export class ProceduresService {
 
   async update(id: string, updateProcedureDto: UpdateProcedureDto) {
     const procedure = await this.findOne(id);
+    if (procedure.code != updateProcedureDto.code){
+    const getProc = await this.findOneByCode(updateProcedureDto.code as any);
+      if (getProc){
+        this.logger.warn(`PROCEDURE already exist id=${getProc.code}`);
+        throw new BusinessException(RESPONSE_MESSAGE.PROCEDURE.EXIST);
+      }
+    }
     await this.procedureRepo.update(id, updateProcedureDto);
     return procedure;
   }
@@ -51,5 +64,10 @@ export class ProceduresService {
     const procedure = await this.findOne(id);
     await this.procedureRepo.delete(id);
     return procedure;
+  }
+
+  async findOneByCode(code: string){
+  const procedure = await this.procedureRepo.findOne({where: {code:code}});
+  return procedure;
   }
 }

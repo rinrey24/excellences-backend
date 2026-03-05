@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateDiagnosisDto } from './dto/create-diagnosis.dto';
 import { UpdateDiagnosisDto } from './dto/update-diagnosis.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,12 +9,18 @@ import { BusinessException } from 'src/common/exceptions/business.exception';
 
 @Injectable()
 export class DiagnosesService {
+  private readonly logger = new Logger(DiagnosesService.name);
   constructor(
     @InjectRepository(Diagnosis)
     private diagnoseRepo: Repository<Diagnosis>,
   ) {}
 
   async create(createDiagnosisDto: CreateDiagnosisDto) {
+    const getDiagnosis = await this.findOneByCode(createDiagnosisDto.code);
+    if (getDiagnosis){
+      this.logger.warn(`DIAGNOSE already exist id=${getDiagnosis.code}`);
+      throw new BusinessException(RESPONSE_MESSAGE.DIAGNOSE.EXIST);
+    }
     const diagnosis = this.diagnoseRepo.create(createDiagnosisDto);
     return await this.diagnoseRepo.save(diagnosis);
    
@@ -43,6 +49,13 @@ export class DiagnosesService {
 
   async update(id: string, updateDiagnosisDto: UpdateDiagnosisDto) {
     const diagnosis = await this.findOne(id);
+    if (diagnosis.code != updateDiagnosisDto.code){
+    const getDiagnosis = await this.findOneByCode(updateDiagnosisDto.code as any);
+      if (getDiagnosis){
+        this.logger.warn(`DIAGNOSE already exist id=${getDiagnosis.code}`);
+        throw new BusinessException(RESPONSE_MESSAGE.DIAGNOSE.EXIST);
+      }
+    }
     await this.diagnoseRepo.update(id, updateDiagnosisDto);
     return diagnosis
   }
@@ -50,6 +63,11 @@ export class DiagnosesService {
   async remove(id: string) {
     const diagnosis = await this.findOne(id);
     await this.diagnoseRepo.delete(id);
+    return diagnosis;
+  }
+
+  async findOneByCode(code: string){
+    const diagnosis = await this.diagnoseRepo.findOne({where: {code:code}});
     return diagnosis;
   }
 }

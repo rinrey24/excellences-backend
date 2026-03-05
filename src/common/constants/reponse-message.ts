@@ -99,6 +99,15 @@ export const RESPONSE_MESSAGE = {
     NOT_FOUND: 'Case type not found',
   },
 
+  DISCHARGE: {
+    FETCHED: 'Discharge fetched successfully',
+    CREATED: 'Discharge created successfully',
+    UPDATED: 'Discharge updated successfully',
+    DELETED: 'Discharge deleted successfully',
+    EXIST: 'Discharge already exist',
+    NOT_FOUND: 'Discharge not found',
+  },
+
   DASHBOARD: {
     FETCHED: 'Dashboard fetched successfully',
     CREATED: 'Dashboard created successfully',

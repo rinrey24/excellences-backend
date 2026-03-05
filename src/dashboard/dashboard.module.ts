@@ -6,12 +6,16 @@ import { AuthModule } from 'src/auth/auth.module';
 import { ClaimSummaryView } from 'src/claims/entities/view/claim-summary.view';
 import { RekapSeverityView } from 'src/claims/entities/view/rekap-severity.view';
 import { RekapDischargeView } from 'src/claims/entities/view/rekap-discharge.view';
+import { RekapTipeKasusView } from 'src/claims/entities/view/rekap-tipe-kasus.view';
+import { RekapCMGView } from 'src/claims/entities/view/rekap-cmg.view';
 
 @Module({
   imports: [ TypeOrmModule.forFeature([
     ClaimSummaryView,
     RekapSeverityView,
     RekapDischargeView,
+    RekapTipeKasusView,
+    RekapCMGView,
   ]),
   forwardRef(() => AuthModule),],
   controllers: [DashboardController],

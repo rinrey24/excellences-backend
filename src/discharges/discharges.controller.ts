@@ -12,21 +12,21 @@ import {
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RESPONSE_MESSAGE } from 'src/common/constants/reponse-message';
 import { formatPaginatedResponse } from 'src/common/utils/pagination.util';
-import { CaseTypesService } from './case_types.service';
-import { CreateCaseTypeDto } from './dto/create-case-type.dto';
-import { UpdateCaseTypeDto } from './dto/update-case-type.dto';
+import { CreateDischargeDto } from './dto/create-discharge.dto';
+import { UpdateDischargeDto } from './dto/update-discharge.dto';
+import { DischargesService } from './discharges.service';
 
-@Controller('case-types')
-export class CaseTypesController {
-  constructor(private readonly caseTypesService: CaseTypesService) {}
+@Controller('discharges')
+export class DischargesController {
+  constructor(private readonly dischargesService: DischargesService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createCaseTypeDto: CreateCaseTypeDto) {
-    const caseType = await this.caseTypesService.create(createCaseTypeDto);
+  async create(@Body() createDischargeDto: CreateDischargeDto) {
+    const discharge = await this.dischargesService.create(createDischargeDto);
     return {
-      message: RESPONSE_MESSAGE.CASE_TYPE.CREATED,
-      data: caseType,
+      message: RESPONSE_MESSAGE.DISCHARGE.CREATED,
+      data: discharge,
     };
   }
 
@@ -39,15 +39,14 @@ export class CaseTypesController {
   ) {
     const pageNum = Math.max(1, parseInt(page) || 1);
     const limitNum = Math.min(1000, Math.max(1, parseInt(limit) || 100));
-    const [caseTypes, total] = await this.caseTypesService.findAll(
+    const [discharges, total] = await this.dischargesService.findAll(
       pageNum,
       limitNum,
       search,
     );
-
     return formatPaginatedResponse(
-      RESPONSE_MESSAGE.CASE_TYPE.FETCHED,
-      caseTypes,
+      RESPONSE_MESSAGE.DISCHARGE.FETCHED,
+      discharges,
       total,
       pageNum,
       limitNum,
@@ -57,10 +56,10 @@ export class CaseTypesController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const caseType = await this.caseTypesService.findOne(id);
+    const discharge = await this.dischargesService.findOne(id);
     return {
-      message: RESPONSE_MESSAGE.CASE_TYPE.FETCHED,
-      data: caseType,
+      message: RESPONSE_MESSAGE.DISCHARGE.FETCHED,
+      data: discharge,
     };
   }
 
@@ -68,22 +67,22 @@ export class CaseTypesController {
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateCaseTypeDto: UpdateCaseTypeDto,
+    @Body() updateDischargeDto: UpdateDischargeDto,
   ) {
-    const caseType = await this.caseTypesService.update(id, updateCaseTypeDto);
+    const discharge = await this.dischargesService.update(id, updateDischargeDto);
     return {
-      message: RESPONSE_MESSAGE.CASE_TYPE.UPDATED,
-      data: caseType,
+      message: RESPONSE_MESSAGE.DISCHARGE.UPDATED,
+      data: discharge,
     };
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    const caseType = await this.caseTypesService.remove(id);
+    const discharge = await this.dischargesService.remove(id);
     return {
-      message: RESPONSE_MESSAGE.CASE_TYPE.DELETED,
-      data: caseType,
+      message: RESPONSE_MESSAGE.DISCHARGE.DELETED,
+      data: discharge,
     };
   }
 }

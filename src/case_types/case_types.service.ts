@@ -15,6 +15,10 @@ export class CaseTypesService {
   ) {}
 
   async create(createCaseTypeDto: CreateCaseTypeDto) {
+    const getCaseType = await this.findOneByCaseType(createCaseTypeDto.tipe_kasus);
+    if (getCaseType){
+      throw new BusinessException(RESPONSE_MESSAGE.CASE_TYPE.EXIST);
+    }
     const caseType = this.caseTypeRepo.create(createCaseTypeDto);
     return this.caseTypeRepo.save(caseType);
   }
@@ -51,13 +55,24 @@ export class CaseTypesService {
 
   async update(id: string, updateCaseTypeDto: UpdateCaseTypeDto) {
     const caseType = await this.findOne(id);
+    if (caseType.tipe_kasus != updateCaseTypeDto.tipe_kasus){
+      const getCaseType = await this.findOneByCaseType(updateCaseTypeDto.tipe_kasus as any);
+        if (getCaseType){
+          throw new BusinessException(RESPONSE_MESSAGE.CASE_TYPE.EXIST);
+        }
+    }
     await this.caseTypeRepo.update(id, updateCaseTypeDto);
-    return caseType;
+    return updateCaseTypeDto;
   }
 
   async remove(id: string) {
     const caseType = await this.findOne(id);
     await this.caseTypeRepo.delete(id);
+    return caseType;
+  }
+
+  async findOneByCaseType(case_type: string) {
+    const caseType = await this.caseTypeRepo.findOne({where: {tipe_kasus:case_type}});
     return caseType;
   }
 }
