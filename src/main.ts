@@ -32,11 +32,12 @@ async function bootstrap() {
   );
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
+  const host = process.env.HOST || 'localhost';
+  await app.listen(port,host);
 
   app
     .get(WINSTON_MODULE_NEST_PROVIDER)
-    .log(`Server running on http://localhost:${port}`);
+    .log(`Server running on http://${host}:${port}`);
 }
 
 bootstrap();
