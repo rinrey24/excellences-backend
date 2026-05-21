@@ -43,7 +43,7 @@ export class HospitalsService {
 
   async update(code: string, dto: UpdateHospitalDto) {
     const hospital = await this.findOne(code);
-    await this.hospitalRepo.update(code, dto);
+    await this.hospitalRepo.update(hospital.id, dto);
     return hospital;
   }
   
