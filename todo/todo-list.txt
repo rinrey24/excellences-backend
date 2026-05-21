@@ -1,0 +1,53 @@
+[x] 1. rapihkan response di claim
+[x] 2. seragamkan semua id menjadi uuid (pengecualian untuk tabel user, dan claim)
+[x] 3. buat tabel transaksinya (satu tabel results jadi satu atau setiap modul satu?)
+[x] 4. buat master diagnosa dan procedure
+[x] 5. rapikan struktur code, controller handle request dan response, dan service handle hanya logic
+        [x] diagnoses
+        [x] procedure 
+        [x] hospitals 
+        [x] overstays 
+        [x] users 
+        [x] claims 
+        [x] rules
+[x] 6. buatkan master rules engine= tabel nya adalah rules, rules_condition_groups, rules_conditions, rules_actions
+[x] 7. terapkan master rules engine dan implementasinya ke transaksi
+[~] 8. buat tabel regulation_versions untuk relasi ke rules nanti
+[x] 9. atau rules dalam bentuk dsl? jawabnya kita coba rules
+[ ] 10. buat rules pembanding antar field (kata kunci: support expression)
+[x] 11. rapihkan dan validasi jika diagnosa/prosedur yang dipisahkan dengan titik koma (;)
+[ ] 12. buat alternatif rule dengan tabel base, jadi peraturannya ada di setiap master tabel nanti
+[x] 13. buat logic / query permanen yang sudah hampir pasti ada di regulasi. 
+    [x] a. PASIEN RAJAL DAN RANAP DI HARI YANG SAMA
+    [x] b. PASIEN RAJAL, DATANG LEBIH DARI 1 KALI DALAM 1 HARI
+    [x] c. PASIEN RANAP, DATANG LEBIH DARI 1 KALI DALAM 1 (SATU) BULAN
+    [x] d. PASIEN RAJAL, DATANG LEBIH DARI 4 KALI DALAM 1 (SATU) BULAN? / MINGGU?
+[ ] 14. tambahkan logger winston setiap aksi/service
+[x] 15. already exist di setiap master yang ada code nya
+[x] 16. buat analyze pisah berdiri sendiri
+[x] 17. buatkan master sebagai berikut:
+    [x] a. master cmg (cmgs) beserta data seed awal
+    [x] b. master tipe kasus (case_types) beserta data seed awal
+    [x] c. master discharge (discharges)
+
+tahap 2:
+[~] 1. buat dashboard
+
+fokus V2
+
+logic excellences:
+general:
+[x] 1. ambil kategori (rawat jalan / rawat inap) = =IF([@[Severity Level]]="";"";IF([@[Severity Level]]="0";"RAWAT JALAN";"RAWAT INAP")) 
+[x] 2. tipe kasus = ambil nilai kedua dari code inacbg (ex. N-3-15-0 maka tipe kasusnya adalah 3) (dari hardcode aja nanti)
+[x] 3. severity level = ambil nilai terakhir dari code inacbg (ex. N-3-15-0 maka severity levelnya adalah 0)
+[~] 4. Des. (description?) = Case-MIX Main Group - Code Inabg - Severity Level - Total Tarif (ex. N - N-3-15-0 - 0 - 941600) (dari hardcode aja nanti)
+[x] 5. Case-MIX Main Group = ambil nilai pertama dari code inacbg (ex. N-3-15-0 maka CMG nya adalah N) (dari hardcode aja nanti)
+
+v2:
+1. rajal vs ranap hari yang sama = cek jika admission_date nya sama, dan nama_pasien sama, dan juga mrn nya sama maka masuk ke kategori ini [x]
+
+v3:
+1. rajal < 7 hari adalah jika ada kunjungan pasien yang dalam seminggu? atau sebulan? sudah berkunjung lebih dari 4 hari = max 4; querynya nanti gabungan dari [@[NAMA PASIEN]]&" - "&[@MRN]&" - "&[@Kategori]
+2. ranap < 30 hari adalah jika ada kunjungan pasien yang dalam sebulan sudah berkunjung lebih dari 2 kali = max 2
+
+

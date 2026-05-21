@@ -1,8 +1,43 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.setGlobalPrefix('api');
+  process.env.TZ = 'Asia/Jakarta';
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      exceptionFactory: (errors) => {
+        return new BadRequestException({
+          message: 'Validation failed',
+          errors: errors.map((err) => ({
+            field: err.property,
+            message: err.constraints
+              ? Object.values(err.constraints)[0]
+              : 'Validation error',
+          })),
+        });
+      },
+    }),
+  );
+
+  const port = process.env.PORT || 3000;
+  const host = process.env.HOST || 'localhost';
+  await app.listen(port,host);
+
+  app
+    .get(WINSTON_MODULE_NEST_PROVIDER)
+    .log(`Server running on http://${host}:${port}`);
 }
+
 bootstrap();
